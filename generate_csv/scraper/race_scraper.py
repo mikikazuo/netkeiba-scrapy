@@ -1,7 +1,5 @@
-import re
-
 from generate_csv import mylib
-
+from netkeiba.netkeiba.spiders import mylib as crawl_mylib
 
 def scrape_from_page(race_html_path):
     html = mylib.read_html(race_html_path)
@@ -13,7 +11,7 @@ def scrape_from_page(race_html_path):
         # 例外処理　URLリンクがついていないパターンがある
         if len(owner):
             owner = owner[0]
-            owner_id = re.sub("\\D", "", result_table_row.xpath("diary_snap_cut/td/a/@href")[-1])
+            owner_id = crawl_mylib.get_last_slash_word(result_table_row.xpath("diary_snap_cut/td/a/@href")[-1])
         else:
             owner = result_table_row.xpath("diary_snap_cut/td//text()")[-1].strip()
             owner_id = None
@@ -29,7 +27,7 @@ def scrape_from_page(race_html_path):
             "age": result_table_row.xpath("td[5]")[0].text[1:],
             "tresen": result_table_row.xpath("td[13]")[0].text.strip()[1],  # 前後に多数の空白があるためstrip処理 ex.200006060207
             "trainer": result_table_row.xpath("td[13]/a/@title")[0],
-            "trainer_id": re.sub("\\D", "", result_table_row.xpath("td[13]/a/@href")[0]),
+            "trainer_id": crawl_mylib.get_last_slash_word(result_table_row.xpath("td[13]/a/@href")[0]),
             "owner": owner,  # 馬主は途中で変わることがある
             "owner_id": owner_id,
         }

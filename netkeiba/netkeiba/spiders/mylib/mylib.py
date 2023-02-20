@@ -3,7 +3,7 @@ import pathlib
 import pandas as pd
 
 # レースデータhtmlの保存先ディレクトリパス
-race_html_dir = 'D:/netkeiba/html_data/race/'
+input_html_dir = 'D:/netkeiba/html_data/race/'
 
 
 def get_last_slash_word(url):
@@ -27,7 +27,7 @@ def make_urls_depend_race_id(base_url, start_year):
 
     [おまけ] 同レース開催地の場合、下３桁目が日ごとに変わる。１レース目は下２桁が01で以後1ずつ増える。
     """
-    p_temp = pathlib.Path(race_html_dir)
+    p_temp = pathlib.Path(input_html_dir)
     str_p_list = [x.stem for x in list(p_temp.iterdir())]
     str_p_df = pd.DataFrame({"race_id": str_p_list})
     str_p_df = str_p_df.loc[str_p_df["race_id"] >= str(start_year) + '00000000', :]

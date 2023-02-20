@@ -10,7 +10,7 @@ class PillarCrawlerSpider(scrapy.Spider):
     allowed_domains = ["race.netkeiba.com"]
 
     # 馬柱htmlの出力先ディレクトリパス
-    output_dir_path = 'D:/netkeiba/html_data/pillar/'
+    output_html_dir = 'D:/netkeiba/html_data/pillar/'
 
     # 馬柱は2007年7月28日から表示される
     base_url = "https://race.netkeiba.com/race/shutuba_past.html?race_id="
@@ -18,7 +18,7 @@ class PillarCrawlerSpider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs):
         super(PillarCrawlerSpider, self).__init__(*args, **kwargs)
-        mylib.make_output_dir(self.output_dir_path)
+        mylib.make_output_dir(self.output_html_dir)
 
     def parse(self, response):
         if not response.css('.Waku1'):
@@ -28,4 +28,4 @@ class PillarCrawlerSpider(scrapy.Spider):
         yield request
 
     def pillar_parse(self, response):
-        mylib.write_html(self.output_dir_path, response.url.split('=')[-1], response)
+        mylib.write_html(self.output_html_dir, response.url.split('=')[-1], response)

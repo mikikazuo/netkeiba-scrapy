@@ -2,9 +2,8 @@
 地方競馬のレースもスクレイピングされるので注意 ex.2018100059
 """
 
-import re
-
 from generate_csv import mylib
+from netkeiba.netkeiba.spiders import mylib as crawl_mylib
 
 
 def scrape_from_page(horse_html_path):
@@ -33,7 +32,7 @@ def scrape_from_page(horse_html_path):
             maker_name[0].text if len(maker_name) else html.xpath('//*[text() = "生産者"]/following-sibling::td')[0].text)
         # 生産者のidが存在しないパターンがある、あとtdタグになってる ex 2012190003
         maker_id = html.xpath('//*[text() = "生産者"]/following-sibling::td/a/@href')
-        maker_id = re.sub("\\D", "", maker_id[0]) if maker_id else None
+        maker_id = crawl_mylib.get_last_slash_word(maker_id[0]) if maker_id else None
 
         # 空欄や「中」止のパターンがある ex.2018100059
         order = result_table_row.xpath("td[12]")[0].text
@@ -50,7 +49,7 @@ def scrape_from_page(horse_html_path):
         horse_weight = result_table_row.xpath("td[24]")[0].text.split(r"(")
         horse_result = {
             "horse_id": horse_html_path.stem,
-            "race_id": re.sub("\\D", "", result_table_row.xpath("td[5]/a/@href")[0]),  # 数字以外の文字を削除
+            "race_id": crawl_mylib.get_last_slash_word(result_table_row.xpath("td[5]/a/@href")[0]),  # 数字以外の文字を削除
             "horse_name": horse_name,  # stripを使う場合はtext()をxpathに埋め込む必要がある
             "birth_date": html.xpath('//*[@id="db_main_box"]/div[2]/div/div[2]/table//tr[1]/td')[0].text,
             "maker_name": maker_name,
@@ -68,7 +67,7 @@ def scrape_from_page(horse_html_path):
             "popularity": result_table_row.xpath("td[11]")[0].text,
             "order": order,
             "jockey": jockey,
-            "jockey_id": re.sub("\\D", "", result_table_row.xpath("td[13]/a/@href")[0]) if len(input_jockey) else None,
+            "jockey_id": crawl_mylib.get_last_slash_word(result_table_row.xpath("td[13]/a/@href")[0]) if len(input_jockey) else None,
             "weight": result_table_row.xpath("td[14]")[0].text,
             "type": result_table_row.xpath("td[15]")[0].text[0],  # 障害レースは芝しかないっぽい
             "length": result_table_row.xpath("td[15]")[0].text[1:],
@@ -90,7 +89,6 @@ def scrape_from_page(horse_html_path):
 if __name__ == '__main__':
     input_html_dir = "D:/netkeiba/html_data/horse/"
     # スクレイピング結果csvの出力先パス
-    output_csv_path = "D:/netkeiba/csv_data/horse_stripped.csv"
+    output_csv_path = "D:/netkeiba/csv_data/horse.csv"
 
-    # mylib.Scraper(input_html_dir, output_csv_path, scrape_from_page, 2018100059)
     mylib.Scraper(input_html_dir, output_csv_path, scrape_from_page, (2010, 2030))

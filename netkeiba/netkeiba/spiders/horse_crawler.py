@@ -17,19 +17,19 @@ class HorseCrawlerSpider(scrapy.Spider):
     # race_scraper.pyで作成したスクレイピングcsv
     input_csv_path = 'D:/netkeiba/csv_data/race.csv'
     # 馬データhtmlの出力先ディレクトリパス
-    output_dir_path = 'D:/netkeiba/html_data/horse/'
+    output_html_dir = 'D:/netkeiba/html_data/horse/'
     # get_raced_horse.pyで出力した馬id一覧csvファイル
     csv_path = 'D:/netkeiba/csv_data/all_horse_max_usable.csv'
 
     def __init__(self, *args, **kwargs):
         super(HorseCrawlerSpider, self).__init__(*args, **kwargs)
-        mylib.make_output_dir(self.output_dir_path)
+        mylib.make_output_dir(self.output_html_dir)
 
         horse_id_df = pd.read_csv(self.input_csv_path, dtype={"horse_id": str})
         horse_id_list = sorted(set(horse_id_df['horse_id']))
 
         # ダウンロード済みhtmlは除外する
-        path_iter = pathlib.Path(self.output_dir_path).iterdir()
+        path_iter = pathlib.Path(self.output_html_dir).iterdir()
         downloaded_horse_id_list = [path.stem for path in path_iter]
         self.start_urls = [self.base_url + x for x in list(set(horse_id_list) - set(downloaded_horse_id_list))]
         print('クロール対象数:' + str(len(self.start_urls)))
@@ -39,4 +39,4 @@ class HorseCrawlerSpider(scrapy.Spider):
         yield request
 
     def horse_parse(self, response):
-        mylib.write_html(self.output_dir_path, mylib.get_last_slash_word(response.url), response)
+        mylib.write_html(self.output_html_dir, mylib.get_last_slash_word(response.url), response)

@@ -10,7 +10,7 @@ class YosoCrawlerSpider(scrapy.Spider):
     allowed_domains = ["race.netkeiba.com"]
 
     # 調子偏差値htmlの出力先ディレクトリパス
-    output_dir_path = 'D:/netkeiba/html_data/yoso/'
+    output_html_dir = 'D:/netkeiba/html_data/yoso/'
 
     # 予想は2011年4月23日から表示される
     base_url = "https://race.netkeiba.com/yoso/yoso_pro_opinion_list.html?race_id="
@@ -18,7 +18,7 @@ class YosoCrawlerSpider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs):
         super(YosoCrawlerSpider, self).__init__(*args, **kwargs)
-        mylib.make_output_dir(self.output_dir_path)
+        mylib.make_output_dir(self.output_html_dir)
 
     def parse(self, response):
         if not response.css('.Pro_Yoso_Detail'):
@@ -28,4 +28,4 @@ class YosoCrawlerSpider(scrapy.Spider):
         yield request
 
     def yoso_parse(self, response):
-        mylib.write_html(self.output_dir_path, response.url.split('=')[-1], response)
+        mylib.write_html(self.output_html_dir, response.url.split('=')[-1], response)

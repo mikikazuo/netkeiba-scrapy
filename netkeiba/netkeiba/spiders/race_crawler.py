@@ -15,12 +15,12 @@ class RaceCrawlerSpider(scrapy.Spider):
     base_url = "https://db.netkeiba.com"
 
     # レースデータhtml出力先ディレクトリパス
-    output_dir_path = 'D:/netkeiba/html_data/race/'
+    output_html_dir = 'D:/netkeiba/html_data/race/'
 
     # start_yearからend_yearまでの年度データを取得
     def __init__(self, start_year, end_year, *args, **kwargs):
         super(RaceCrawlerSpider, self).__init__(*args, **kwargs)
-        mylib.make_output_dir(self.output_dir_path)
+        mylib.make_output_dir(self.output_html_dir)
 
         # 1985年以前はレースデータに１着の馬しか記載されていないため、ここで切り上げる
         start_year_formed = np.clip(start_year, 1986, None)
@@ -51,4 +51,4 @@ class RaceCrawlerSpider(scrapy.Spider):
 
     def race_parse(self, response):
         # filterはリスト内の空文字を除去する
-        mylib.write_html(self.output_dir_path, mylib.get_last_slash_word(response.url), response)
+        mylib.write_html(self.output_html_dir, mylib.get_last_slash_word(response.url), response)

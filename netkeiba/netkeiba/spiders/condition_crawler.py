@@ -9,7 +9,7 @@ class ConditionCrawlerSpider(scrapy.Spider):
     allowed_domains = ["race.sp.netkeiba.com"]
 
     # 調子偏差値htmlの出力先ディレクトリパス
-    output_dir_path = 'D:/netkeiba/html_data/condition/'
+    output_html_dir = 'D:/netkeiba/html_data/condition/'
 
     # 調子偏差値は2017年1月から導入されている。区切りがいい1月からなのでparseで弾く条件文は必要はない。
     base_url = "https://race.sp.netkeiba.com/barometer/score.html?race_id="
@@ -17,11 +17,11 @@ class ConditionCrawlerSpider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs):
         super(ConditionCrawlerSpider, self).__init__(*args, **kwargs)
-        mylib.make_output_dir(self.output_dir_path)
+        mylib.make_output_dir(self.output_html_dir)
 
     def parse(self, response):
         request = scrapy.Request(url=response.url, callback=self.condition_parse)
         yield request
 
     def condition_parse(self, response):
-        mylib.write_html(self.output_dir_path, response.url.split('=')[-1], response)
+        mylib.write_html(self.output_html_dir, response.url.split('=')[-1], response)
