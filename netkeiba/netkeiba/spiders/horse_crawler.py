@@ -11,15 +11,12 @@ from . import mylib
 class HorseCrawlerSpider(scrapy.Spider):
     name = 'horse_crawler'
     allowed_domains = ['db.netkeiba.com']
-    start_urls = ['http://db.netkeiba.com/?pid=race_top']
     base_url = "https://db.netkeiba.com/horse/"
 
     # race_scraper.pyで作成したスクレイピングcsv
     input_csv_path = 'D:/netkeiba/csv_data/race.csv'
     # 馬データhtmlの出力先ディレクトリパス
     output_html_dir = 'D:/netkeiba/html_data/horse/'
-    # get_raced_horse.pyで出力した馬id一覧csvファイル
-    csv_path = 'D:/netkeiba/csv_data/all_horse_max_usable.csv'
 
     def __init__(self, *args, **kwargs):
         super(HorseCrawlerSpider, self).__init__(*args, **kwargs)
