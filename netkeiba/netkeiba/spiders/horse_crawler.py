@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-# race_scraper.pyで出力されたrace.csvにあるhorse_idを元にクロール
-import pathlib
 
 import pandas as pd
 import scrapy

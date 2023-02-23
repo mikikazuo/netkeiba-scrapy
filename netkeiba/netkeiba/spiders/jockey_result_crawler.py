@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import pathlib
 
-import pandas as pd
 import scrapy
 
 from . import mylib
@@ -26,13 +24,8 @@ class JockeyResultCrawlerSpider(scrapy.Spider):
         super(JockeyResultCrawlerSpider, self).__init__(*args, **kwargs)
         mylib.make_output_dir(self.output_html_dir)
 
-        jockey_id_df = pd.read_csv(self.input_csv_path, dtype={"jockey_id": str})
-        jockey_id_list = sorted(set(jockey_id_df['jockey_id']))
-
-        # ダウンロード済みhtmlは除外する
-        path_iter = pathlib.Path(self.output_html_dir).iterdir()
-        downloaded_jockey_id_list = [path.stem for path in path_iter]
-        self.start_urls = [self.base_url + x for x in list(set(jockey_id_list) - set(downloaded_jockey_id_list))]
+        self.start_urls = mylib.make_urls_depend_list_csv(self.base_url, self.input_csv_path, 'jockey_id',
+                                                          self.output_html_dir)
         print('クロール対象数:' + str(len(self.start_urls)))
 
     def parse(self, response):
