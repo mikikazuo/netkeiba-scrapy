@@ -19,6 +19,11 @@ class JockeyProfileCrawlerSpider(scrapy.Spider):
     output_html_dir = 'D:/netkeiba/html_data/jockey_profile/'
 
     def __init__(self, *args, **kwargs):
+        """
+        「取得」
+
+        年度指定なしで実行
+        """
         super(JockeyProfileCrawlerSpider, self).__init__(*args, **kwargs)
         mylib.make_output_dir(self.output_html_dir)
 
@@ -32,8 +37,7 @@ class JockeyProfileCrawlerSpider(scrapy.Spider):
         print('クロール対象数:' + str(len(self.start_urls)))
 
     def parse(self, response):
-        request = scrapy.Request(url=response.url, callback=self.jockey_profile_parse)
-        yield request
+        yield scrapy.Request(url=response.url, callback=self.jockey_profile_parse)
 
     def jockey_profile_parse(self, response):
         mylib.write_html(self.output_html_dir, mylib.get_last_slash_word(response.url), response)

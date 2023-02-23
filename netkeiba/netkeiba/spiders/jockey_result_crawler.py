@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-年度が変わったらすべてhtmlを削除し、クロールし直すこと
-"""
 import pathlib
 
 import pandas as pd
@@ -21,6 +18,11 @@ class JockeyResultCrawlerSpider(scrapy.Spider):
     output_html_dir = 'D:/netkeiba/html_data/jockey_result/'
 
     def __init__(self, *args, **kwargs):
+        """
+        「更新」
+
+        年度が変わったら全てのhtmlを削除し、クロールし直すこと
+        """
         super(JockeyResultCrawlerSpider, self).__init__(*args, **kwargs)
         mylib.make_output_dir(self.output_html_dir)
 
@@ -34,8 +36,7 @@ class JockeyResultCrawlerSpider(scrapy.Spider):
         print('クロール対象数:' + str(len(self.start_urls)))
 
     def parse(self, response):
-        request = scrapy.Request(url=response.url, callback=self.jockey_profile_parse)
-        yield request
+        yield scrapy.Request(url=response.url, callback=self.jockey_profile_parse)
 
     def jockey_profile_parse(self, response):
         mylib.write_html(self.output_html_dir, mylib.get_last_slash_word(response.url), response)
