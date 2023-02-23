@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-
+"""
+年度が変わったらすべてhtmlを削除し、クロールし直すこと
+"""
 import pathlib
 
 import pandas as pd
@@ -8,18 +10,18 @@ import scrapy
 from . import mylib
 
 
-class JockeyProfileCrawlerSpider(scrapy.Spider):
-    name = 'jockey_profile_crawler'
+class JockeyResultCrawlerSpider(scrapy.Spider):
+    name = 'jockey_result_crawler'
     allowed_domains = ['db.netkeiba.com']
-    base_url = "https://db.netkeiba.com/jockey/"
+    base_url = "https://db.netkeiba.com/jockey/result/"
 
     # get_jockey_id.pyで作成した騎手id一覧csv
     input_csv_path = 'D:/netkeiba/csv_data/all_jockey_id.csv'
     # 騎手プロフィールhtmlの出力先ディレクトリパス
-    output_html_dir = 'D:/netkeiba/html_data/jockey_profile/'
+    output_html_dir = 'D:/netkeiba/html_data/jockey_result/'
 
     def __init__(self, *args, **kwargs):
-        super(JockeyProfileCrawlerSpider, self).__init__(*args, **kwargs)
+        super(JockeyResultCrawlerSpider, self).__init__(*args, **kwargs)
         mylib.make_output_dir(self.output_html_dir)
 
         jockey_id_df = pd.read_csv(self.input_csv_path, dtype={"jockey_id": str})
