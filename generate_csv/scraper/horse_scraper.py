@@ -1,15 +1,15 @@
 """
 地方競馬のレースもスクレイピングされるので注意 ex.2018100059
 """
+import re
+
+import pandas as pd
 
 from generate_csv import mylib
 from netkeiba.netkeiba.spiders import mylib as crawl_mylib
 
 
 def scrape_from_page(horse_html_path):
-    """
-    1つのページからlxmlなどを使ってスクレイピングする。
-    """
     html = mylib.read_html(horse_html_path)
 
     result_table_rows = html.xpath('//*[@id="contents"]/div[5]/div/table//tr[not(contains(@align, "center"))]')
@@ -26,7 +26,7 @@ def scrape_from_page(horse_html_path):
         if "円" not in sell_price:
             sell_price = None
 
-            # 生産者名のタグ構造が異なるパターンがある ex2000190013
+        # 生産者名のタグ構造が異なるパターンがある ex2000190013
         maker_name = html.xpath('//*[text() = "生産者"]/following-sibling::td/a')
         maker_name = (
             maker_name[0].text if len(maker_name) else html.xpath('//*[text() = "生産者"]/following-sibling::td')[0].text)
@@ -36,8 +36,8 @@ def scrape_from_page(horse_html_path):
 
         # 空欄や「中」止のパターンがある ex.2018100059
         order = result_table_row.xpath("td[12]")[0].text
-        if order and not order.isdecimal():
-            order = None
+        if order:
+            order = re.sub(r"\D", "", order)  # (降)の除去 ex.2015103057
 
         input_jockey = result_table_row.xpath("td[13]/a")
         jockey = (input_jockey[0].text if len(input_jockey) else result_table_row.xpath("td[13]")[0].text.strip())
@@ -67,7 +67,8 @@ def scrape_from_page(horse_html_path):
             "popularity": result_table_row.xpath("td[11]")[0].text,
             "order": order,
             "jockey": jockey,
-            "jockey_id": crawl_mylib.get_last_slash_word(result_table_row.xpath("td[13]/a/@href")[0]) if len(input_jockey) else None,
+            "jockey_id": crawl_mylib.get_last_slash_word(result_table_row.xpath("td[13]/a/@href")[0]) if len(
+                input_jockey) else None,
             "weight": result_table_row.xpath("td[14]")[0].text,
             "type": result_table_row.xpath("td[15]")[0].text[0],  # 障害レースは芝しかないっぽい
             "length": result_table_row.xpath("td[15]")[0].text[1:],

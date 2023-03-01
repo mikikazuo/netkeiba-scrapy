@@ -44,7 +44,6 @@ class Scraper:
         :param regex: 指定なし/全ファイル______tuple指定/指定範囲年度のファイル______int指定/対象１ファイル
         """
         # イテレータのままだと一度参照すると再度参照できないためリスト化する。ファイル名で自動でsortされている。
-        # TODO 馬の場合 globで限定指定するか？？？
         path = pathlib.Path(input_html_dir)
         # 全ファイル
         if not regex:
@@ -69,7 +68,9 @@ class Scraper:
         confirm_exist_file_delete(self.output_csv_path)
         header = self.scrape_from_page(self.html_path_list[0])[0].keys()
         with open(self.output_csv_path, "w", encoding="utf-8") as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=header)
+            # デフォルトだと改行コードがWindowsのCRLF(\r\n)になっている。
+            # データ解析のDocker側はLinux系でLF(\n)なので明示的に改行コード指定
+            writer = csv.DictWriter(csvfile, fieldnames=header, lineterminator='\n')
             writer.writeheader()
         print("出力csvファイルの初期化完了")
         return header
@@ -86,7 +87,7 @@ class Scraper:
 
         with Pool() as pool:
             with open(self.output_csv_path, "a", encoding="utf-8") as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=self.csv_header)
+                writer = csv.DictWriter(csvfile, fieldnames=self.csv_header, lineterminator='\n')
                 # マルチプロセスで同時に参照するhtmlのパスリスト
                 pooled_path = []
                 for i, html_path in enumerate(tqdm(self.html_path_list)):

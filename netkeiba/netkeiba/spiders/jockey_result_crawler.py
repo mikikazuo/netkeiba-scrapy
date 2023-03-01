@@ -12,7 +12,7 @@ class JockeyResultCrawlerSpider(scrapy.Spider):
 
     # get_jockey_id.pyで作成した騎手id一覧csv
     input_csv_path = 'D:/netkeiba/csv_data/all_jockey_id.csv'
-    # 騎手プロフィールhtmlの出力先ディレクトリパス
+    # 騎手実績htmlの出力先ディレクトリパス
     output_html_dir = 'D:/netkeiba/html_data/jockey_result/'
 
     def __init__(self, *args, **kwargs):

@@ -10,7 +10,7 @@ class YosoCrawlerSpider(scrapy.Spider):
     allowed_domains = ["race.netkeiba.com"]
     base_url = "https://race.netkeiba.com/yoso/yoso_pro_opinion_list.html?race_id="
 
-    # 調子偏差値htmlの出力先ディレクトリパス
+    # 予想htmlの出力先ディレクトリパス
     output_html_dir = 'D:/netkeiba/html_data/yoso/'
 
     def __init__(self, start_year=2011, *args, **kwargs):

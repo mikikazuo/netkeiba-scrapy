@@ -1,6 +1,7 @@
 from generate_csv import mylib
 from netkeiba.netkeiba.spiders import mylib as crawl_mylib
 
+
 def scrape_from_page(race_html_path):
     html = mylib.read_html(race_html_path)
 

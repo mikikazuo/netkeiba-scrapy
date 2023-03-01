@@ -58,5 +58,4 @@ class RaceCrawlerSpider(scrapy.Spider):
                 yield scrapy.Request(url=race_url, callback=self.race_parse)
 
     def race_parse(self, response):
-        # filterはリスト内の空文字を除去する
         mylib.write_html(self.output_html_dir, mylib.get_last_slash_word(response.url), response)
