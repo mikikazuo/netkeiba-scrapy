@@ -40,8 +40,8 @@ class Scraper:
         """
         :param input_html_dir: データ抽出元となるhtmlのディレクトリ
         :param output_csv_path: csvの出力先パス
-        :param scrape_from_page: スクレイピング関数、マルチスレッドで結果を受け取る場合はクラス外関数にする必要がある（継承不可）
-        :param regex: 指定なし/全ファイル______tuple指定/指定範囲年度のファイル______int指定/対象１ファイル
+        :param scrape_from_page: リストを戻り値とするスクレイピング関数、マルチスレッドで結果を受け取る場合はクラス外関数にする必要がある（継承不可）
+        :param regex: [指定なし]全ファイル______[tuple指定]指定範囲年度のファイル______[int指定]対象１ファイル
         """
         # イテレータのままだと一度参照すると再度参照できないためリスト化する。ファイル名で自動でsortされている。
         path = pathlib.Path(input_html_dir)
@@ -51,6 +51,9 @@ class Scraper:
         # 指定範囲年度のファイル
         elif isinstance(regex, tuple):
             self.html_path_list = sum([list(path.glob(year + '*')) for year in map(str, range(regex[0], regex[1]))], [])
+        # 指定複数ファイル
+        elif isinstance(regex, list):
+            self.html_path_list = sum([list(path.glob(file_id + '.html')) for file_id in regex], [])
         # 1ファイルチェック用
         elif isinstance(regex, int):
             self.html_path_list = list(path.glob(str(regex) + '.html'))

@@ -50,4 +50,4 @@ if __name__ == '__main__':
     # スクレイピング結果csvの出力先パス
     output_csv_path = "D:/netkeiba/csv_data/race.csv"
 
-    mylib.Scraper(input_html_dir, output_csv_path, scrape_from_page)
+    mylib.Scraper(input_html_dir, output_csv_path, scrape_from_page, (2018, 2030))
