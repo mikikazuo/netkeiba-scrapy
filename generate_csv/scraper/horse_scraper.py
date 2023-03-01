@@ -92,4 +92,14 @@ if __name__ == '__main__':
     # スクレイピング結果csvの出力先パス
     output_csv_path = "D:/netkeiba/csv_data/horse.csv"
 
-    mylib.Scraper(input_html_dir, output_csv_path, scrape_from_page, (2010, 2030))
+    # race_scraper.pyで作成したスクレイピングcsv
+    input_csv_path = 'D:/netkeiba/csv_data/race.csv'
+    # race_scraper.pyでの取得開始年度
+    # この年度以降のレースに出場した馬を取得する
+    start_year = 2018
+
+    horse_id_df = pd.read_csv(input_csv_path, dtype={"horse_id": str, "race_id": str})
+    horse_id_list = list(
+        sorted(set(horse_id_df.loc[horse_id_df["race_id"] >= str(start_year) + '00000000', :]['horse_id'])))
+
+    mylib.Scraper(input_html_dir, output_csv_path, scrape_from_page, horse_id_list)
