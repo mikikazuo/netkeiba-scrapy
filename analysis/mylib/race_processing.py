@@ -1,7 +1,7 @@
 import pandas as pd
 
 import mypath
-from .mylib import *
+from mylib import *
 
 
 # （注意）cudf上でdf.loc[<horse_id>,<race_id>]で取得する場合、
