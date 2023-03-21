@@ -36,6 +36,7 @@ class PastRaceProcessing:
         for horse_id in tqdm(horse_id_list):
             result_list.append(self.past_race_id_list(horse_id))
 
+        # Noneは省略されて詰められる
         return pd.concat(result_list)
 
     def __init__(self, merged_df):

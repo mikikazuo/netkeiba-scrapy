@@ -1,45 +1,34 @@
 import lightgbm as lgb
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
-import mylib
+from mylib import *
 
 
 class LightGbm:
-    testSize = 0.1
+    test_size = 0.1
 
     def training(self):
-        df_train, df_val = train_test_split(
-            self.df[[self.col] + self.target_columns],
-            shuffle=False,
-            test_size=self.testSize,
-        )
-        train_y = df_train[self.col]
-        train_x = df_train.drop(self.col, axis=1)
+        df_train, df_val = train_test_split(self.df[[self.target_col] + self.target_columns], shuffle=False,
+                                            test_size=self.test_size)
+        train_y = df_train[self.target_col]
+        train_x = df_train.drop(self.target_col, axis=1)
 
-        self.val_y = df_val[self.col]
-        self.val_x = df_val.drop(self.col, axis=1)
+        self.val_y = df_val[self.target_col]
+        self.val_x = df_val.drop(self.target_col, axis=1)
 
         trains = lgb.Dataset(train_x, train_y)
         valids = lgb.Dataset(self.val_x, self.val_y)
 
         params = {"objective": "regression", "metrics": "mae"}
 
-        self.model = lgb.train(
-            params,
-            trains,
-            valid_sets=valids,
-            num_boost_round=1000,
-            callbacks=[
-                lgb.early_stopping(
-                    stopping_rounds=500, verbose=True
-                ),  # early_stopping用コールバック関数
-                lgb.log_evaluation(0),
-            ],  # コマンドライン出力用コールバック関数
-        )
+        self.model = lgb.train(params, trains, valid_sets=valids, num_boost_round=1000,
+                               callbacks=[
+                                   lgb.early_stopping(stopping_rounds=500, verbose=True),  # early_stopping用コールバック関数
+                                   lgb.log_evaluation(0)],  # コマンドライン出力用コールバック関数
+                               )
         self.test_predicted = self.model.predict(self.val_x)
 
     # 予測値を図で確認する関数の定義
@@ -54,14 +43,7 @@ class LightGbm:
         x = np.linspace(0, 1, 2)
         y = x
         ax.plot(x, y, "r-")
-        plt.text(
-            0.1,
-            0.9,
-            "RMSE = {}".format(str(round(RMSE, 3))),
-            transform=ax.transAxes,
-            fontsize=15,
-        )
-        #plt.show()
+        plt.text(0.1, 0.9, "RMSE = {}".format(str(round(RMSE, 3))), transform=ax.transAxes, fontsize=15)
 
     def protData(self):
         lgb.plot_importance(self.model, height=0.5, figsize=(16, 12), ignore_zero=False)
@@ -74,7 +56,7 @@ class LightGbm:
     # ペイバック計算用の予測値を付与したレースごとにまとめたデータリスト作成、他に必要なカラム(order, umabanなど)も追加
     def makePredictDataset(self):
         df_train, self.df_predict = train_test_split(self.df[self.target_columns + ["order"]], shuffle=False,
-                                                     test_size=self.testSize)
+                                                     test_size=self.test_size)
         # lightgbmの予測値カラムの追加
         self.df_predict["predict"] = self.test_predicted
         df_val_list = []
@@ -91,28 +73,19 @@ class LightGbm:
     def __init__(self, df):
         self.pastNum = 2
         # 目的変数カラム
-        self.col = "order_normalize"
+        self.target_col = "order_normalize"
 
         # 答えになってしまうカラム（レース後にわかるデータ）
-        answer_col = [self.col] + [
-            "time",
-            "diff_from_top",
-            "nobori",
-            "order",
-            "pace_goal",
-            "pace_start",
-            "order_of_corners"
-        ]
+        answer_col = [self.target_col] + ["time", "diff_from_top", "nobori", "order", "pace_goal", "pace_start",
+                                          "order_of_corners"]
 
-        if mylib.is_human:
+        if DataframeProcessing.is_human:
             answer_col = answer_col + ["popularity", "odds"]
 
         # 説明変数カラム
-        self.target_columns = list(df.columns)
-        for i in answer_col:
-            self.target_columns.remove(i)
+        self.target_columns = list(set(df.columns) - set(answer_col))
 
-        # self.target_columns.remove('race_cnt')
+        # 過去レースとの差分日数を抽出したので用済み
         self.target_columns.remove("race_date")
 
         # 特例 order_normalizeがあるので不要
