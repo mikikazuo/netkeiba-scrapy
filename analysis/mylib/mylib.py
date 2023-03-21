@@ -1,7 +1,14 @@
 import numpy as np
 
-#人的要因を考慮するか
-is_human = False
+
+class DataframeProcessing:
+    # 人的要因を考慮するか
+    is_human = False
+
+    def change_type(self, columns, to_type):
+        for col in columns:
+            self.df[col] = self.df[col].astype(to_type)
+
 
 def reduce_mem_usage(df, verbose=True):
     numerics = ["int16", "int32", "int64", "float16", "float32", "float64"]
