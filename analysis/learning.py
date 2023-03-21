@@ -17,7 +17,7 @@ if __name__ == "__main__":
     gbm = LightGbm(past_add_data.df)
     df_predict = gbm.makePredictDataset()
     #gbm.protData()
-    money = Monetize(df_predict, paybackData)
+    money = Monetize(df_predict, paybackData.df)
 
     money.check_pattern_payback(['tanshou', 'fukushou'], list(range(3)))
     money.check_pattern_payback(['wakuren', 'umaren', 'wide', 'umatan'], [[0, 1], [0, 2], [1, 2]])
