@@ -32,8 +32,8 @@ class PastRaceProcessing:
         for i in range(self.pastNum + 1):
             data = race_df[i: i + race_lenght - self.pastNum]
             if i == 0:
-                # horse_processing.pyで取得される海外レースのidに英語が含まれていて自動的にstr型になっている。
-                # マージでインデックス型を合わせるために変換 ex 2019J0033009
+                # horse_processing.pyで取得される海外レースのidに英語が含まれていると自動的にstr型になる。
+                # マージでインデックス型を合わせる必要があるため変換 ex 2019J0033009
                 base_index = list(map(str, data.index))
             else:
                 # mergeはなぜか使えない 一致する自作カラムが最低一つ必要か？

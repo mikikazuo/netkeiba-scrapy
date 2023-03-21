@@ -44,7 +44,8 @@ class HorseProcessing(DataframeProcessing):
             self.df = self.df.drop(cnt_column, axis=1)
 
     def __init__(self):
-        self.df = pd.read_csv(mypath.horse_csv)
+        # 海外のレースが含まれない範囲の場合、int型になってしまうため手動でstr化 ex.2019J0033009
+        self.df = pd.read_csv(mypath.horse_csv, dtype={'race_id': str})
 
         # 不要列の削除
         self.df = self.df.drop(["race_name", "horse_name", "sell_price", "maker_name", "jockey", "reward"], axis=1)
@@ -95,8 +96,6 @@ class HorseProcessing(DataframeProcessing):
             self.set_order_cnt(cnt_data)
         self.set_order_cnt_normalize()
 
-        # 海外のレースが含まれない範囲の場合、int型になってしまうため手動でstr化 ex.2019J0033009
-        self.change_type(["race_id"], "str")
         self.df = self.df.set_index(["race_id", "horse_id"])
 
         if not self.is_human:
