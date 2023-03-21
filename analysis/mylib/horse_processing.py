@@ -100,3 +100,5 @@ class HorseProcessing(DataframeProcessing):
 
         if not self.is_human:
             self.df = self.df.drop(["popularity", "odds"], axis=1)
+
+        self.df = reduce_mem_usage(self.df)

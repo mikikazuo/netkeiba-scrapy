@@ -10,18 +10,13 @@ if __name__ == "__main__":
     raceData = RaceProcessing()
     paybackData = PaybackProcessing()
 
-    # null行の表示
-    # df2 = payback_data.df
-    # print(df2[df2.isnull().any(axis=1)])
-
-    horseData.df = reduce_mem_usage(horseData.df)
     merged_df = raceData.df.merge(horseData.df, on=["race_id", "horse_id"], how="inner")
 
     past_add_data = PastRaceProcessing(merged_df)
 
     gbm = LightGbm(past_add_data.df)
     df_predict = gbm.makePredictDataset()
-    gbm.protData()
+    #gbm.protData()
     money = Monetize(df_predict, paybackData)
 
     money.check_pattern_payback(['tanshou', 'fukushou'], list(range(3)))
