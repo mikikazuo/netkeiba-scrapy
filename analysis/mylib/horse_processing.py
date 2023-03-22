@@ -5,7 +5,7 @@ import pandas as pd
 from tqdm import tqdm
 
 import mypath
-from mylib import *
+from analysis.mylib.general import *
 
 
 class HorseProcessing(DataframeProcessing):

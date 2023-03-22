@@ -1,6 +1,7 @@
 import csv
 import os
 import pathlib
+import time
 from multiprocessing import Pool
 
 import lxml.html
@@ -31,16 +32,22 @@ def delete_space(result):
     スペース（\xa0）の削除
     """
     for key in result:
-        if result[key] and type(result[key]) is not bool:
+        if result[key] and not isinstance(result[key], bool):
             result[key] = result[key].strip()
 
 
 class Scraper:
+    # @abstractmethod
+    # def scrape_from_page(self, race_html_path):
+    #     """
+    #     リストを戻り値とするスクレイピング関数、
+    #     """
+    #     pass
+
     def __init__(self, input_html_dir, output_csv_path, scrape_from_page, regex: None | tuple | int = None):
         """
         :param input_html_dir: データ抽出元となるhtmlのディレクトリ
         :param output_csv_path: csvの出力先パス
-        :param scrape_from_page: リストを戻り値とするスクレイピング関数、マルチスレッドで結果を受け取る場合はクラス外関数にする必要がある（継承不可）
         :param regex: [指定なし]全ファイル______[tuple指定]指定範囲年度のファイル______[int指定]対象１ファイル
         """
         # イテレータのままだと一度参照すると再度参照できないためリスト化する。ファイル名で自動でsortされている。
@@ -69,7 +76,8 @@ class Scraper:
         csvファイルが存在しない場合にヘッダーの初期化とファイルの生成
         """
         confirm_exist_file_delete(self.output_csv_path)
-        header = self.scrape_from_page(self.html_path_list[0])[0].keys()
+        header = list(self.scrape_from_page(self.html_path_list[0])[0].keys())
+
         with open(self.output_csv_path, "w", encoding="utf-8") as csvfile:
             # デフォルトだと改行コードがWindowsのCRLF(\r\n)になっている。
             # データ解析のDocker側はLinux系でLF(\n)なので明示的に改行コード指定
@@ -84,9 +92,11 @@ class Scraper:
         """
 
         def write_result(path):
-            results = pool.map(self.scrape_from_page, path)
-            for result in results:
+            result_list = pool.map(self.scrape_from_page, path)
+            for result in result_list:
                 writer.writerows(result)
+
+        start = time.time()
 
         with Pool() as pool:
             with open(self.output_csv_path, "a", encoding="utf-8") as csvfile:
@@ -96,8 +106,11 @@ class Scraper:
                 for i, html_path in enumerate(tqdm(self.html_path_list)):
                     pooled_path.append(html_path)
                     # 一定数ごとにcsvに書き込み。
-                    if i > 0 and i % os.cpu_count() == 0:
-                        write_result(pooled_path)
-                        pooled_path = []
+                    # if ranker > 0 and ranker % os.cpu_count() == 0:
+                    #     write_result(pooled_path)
+                    #     pooled_path = []
                 # 終盤端数分の処理
                 write_result(pooled_path)
+
+        process_time = time.time() - start
+        print(process_time)
