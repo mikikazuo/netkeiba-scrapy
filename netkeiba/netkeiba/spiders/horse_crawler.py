@@ -25,9 +25,9 @@ class HorseCrawlerSpider(scrapy.Spider):
         super(HorseCrawlerSpider, self).__init__(*args, **kwargs)
         mylib.make_output_dir(self.output_html_dir)
 
-        horse_id_df = pd.read_csv(self.input_csv_path, dtype={"horse_id": str, "race_id": str})
+        race_df = pd.read_csv(self.input_csv_path, dtype={"horse_id": str, "race_id": str})
         horse_id_list = list(
-            sorted(set(horse_id_df.loc[horse_id_df["race_id"] >= str(start_year) + '00000000', :]['horse_id'])))
+            sorted(set(race_df.loc[race_df["race_id"] >= str(start_year) + '00000000', :]['horse_id'])))
         self.start_urls = [self.base_url + x for x in horse_id_list]
         print('クロール対象数:' + str(len(self.start_urls)))
 

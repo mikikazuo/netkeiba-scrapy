@@ -39,12 +39,9 @@ def make_urls_depend_race_id(base_url, start_year):
 
     [おまけ] 同レース開催地の場合、下３桁目が日ごとに変わる。１レース目は下２桁が01で以後1ずつ増える。
     """
-    df_temp_header = "race_id"
     p_temp = pathlib.Path(input_race_html_dir).iterdir()
-    str_p_list = [x.stem for x in p_temp]
-    str_p_df = pd.DataFrame({df_temp_header: str_p_list})
-    str_p_df = str_p_df.loc[str_p_df[df_temp_header] >= str(start_year) + '00000000', :]
-    return [base_url + race_id for race_id in str_p_df[df_temp_header]]
+    race_id_list = [x.stem for x in p_temp if x.stem >= str(start_year) + '00000000']
+    return [base_url + race_id for race_id in race_id_list]
 
 
 def make_urls_depend_horse_id(base_url, output_html_dir):
@@ -54,16 +51,14 @@ def make_urls_depend_horse_id(base_url, output_html_dir):
     :param base_url: horse_idが可変部分となるベースとなるURL
     :param output_html_dir: htmlの出力先ディレクトリパス。ダウンロード済みかどうかのチェックに使う。
     """
-    df_temp_header = "horse_id"
     p_temp = pathlib.Path(input_horse_html_dir).iterdir()
-    str_p_list = [x.stem for x in p_temp]
-    str_p_df = pd.DataFrame({df_temp_header: str_p_list})
+    horse_id_list = [x.stem for x in p_temp]
 
     # ダウンロード済みhtmlは除外する
     path_iter = pathlib.Path(output_html_dir).iterdir()
     downloaded_id_list = [path.stem for path in path_iter]
 
-    return [base_url + horse_id for horse_id in list(set(str_p_df[df_temp_header]) - set(downloaded_id_list))]
+    return [base_url + horse_id for horse_id in list(set(horse_id_list) - set(downloaded_id_list))]
 
 
 def make_urls_depend_list_csv(base_url, input_csv_path, header, output_html_dir):

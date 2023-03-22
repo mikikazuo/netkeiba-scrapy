@@ -1,1 +1,1 @@
-from .mylib import *
+from .general import *
