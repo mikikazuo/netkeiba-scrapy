@@ -4,6 +4,7 @@ race_htmlから騎手のidを抽出する
 
 import os
 import pathlib
+import time
 from multiprocessing import Pool
 
 import pandas as pd
@@ -26,6 +27,8 @@ def get_all_jockey_crawled(path):
 if __name__ == '__main__':
     # レースデータのディレクトリパス
     input_html_dir = 'D:/netkeiba/html_data/race/'
+
+    start = time.time()
     # レースデータhtmlの参照年度の指定
     # レースが最小条件で1986年1月からなので、1986年1月からにした,
     race_path_list = sum([list(pathlib.Path(input_html_dir).glob(year + '*')) for year in map(str, range(1986, 2050))],
@@ -54,3 +57,6 @@ if __name__ == '__main__':
     # 昇順で出力する
     all_horse_df = all_horse_df.sort_values("jockey_id", ascending=True)
     all_horse_df.to_csv(output_csv_path, index=False)
+
+    process_time = time.time() - start
+    print(process_time)
