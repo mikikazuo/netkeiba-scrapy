@@ -90,17 +90,26 @@ class Scraper:
         """
         マルチプロセスによるスクレイピングの実行と結果の書き込み
         """
+
+        def write_result(path):
+            result_list = pool.map(self.scrape_from_page, path)
+            for result in result_list:
+                writer.writerows(result)
+
         start = time.time()
+
         with Pool() as pool:
             with open(self.output_csv_path, "a", encoding="utf-8") as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=self.csv_header, lineterminator='\n')
                 # マルチプロセスで同時に参照するhtmlのパスリスト
                 pooled_path = []
-                for html_path in tqdm(self.html_path_list):
+                for i, html_path in enumerate(tqdm(self.html_path_list)):
                     pooled_path.append(html_path)
-                # imapは遅いためmapでまとめてスクレイピング
-                result_list = pool.map(self.scrape_from_page, pooled_path)
-                for result in result_list:
-                    writer.writerows(result)
+                    # 多すぎる場合一括だと逆に遅くなるため、一定数ごとにcsvに書き込み。
+                    if i > 0 and i % os.cpu_count() == 0:
+                        write_result(pooled_path)
+                        pooled_path = []
+                # 終盤端数分の処理
+                write_result(pooled_path)
         process_time = time.time() - start
         print(process_time)
