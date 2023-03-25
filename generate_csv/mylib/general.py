@@ -2,7 +2,7 @@ import csv
 import os
 import pathlib
 import time
-from abc import abstractmethod
+from abc import ABCMeta, abstractmethod
 from multiprocessing import Pool
 
 import lxml.html
@@ -37,9 +37,9 @@ def delete_space(result):
             result[key] = result[key].strip()
 
 
-class Scraper:
+class Scraper(metaclass=ABCMeta):
     @abstractmethod
-    def scrape_from_page(self, race_html_path):
+    def scrape_from_page(self, html_path):
         """
         リストを戻り値とするスクレイピング関数、
         """
