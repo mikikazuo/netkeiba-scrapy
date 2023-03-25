@@ -2,7 +2,7 @@ from generate_csv import mylib
 
 
 class PaybackScraper(mylib.Scraper):
-    def scrape_from_page(self, race_html_path):
+    def scrape_from_page(self, html_path):
         """
         三連単（全レース実装）はざっくり2009年以降。※正確には2008年7月19日以降
         """
@@ -15,7 +15,7 @@ class PaybackScraper(mylib.Scraper):
             key_size = int(len(data) / 3)
             return {'umaban': data[0:key_size], 'payback': data[key_size:key_size * 2], 'ninki': data[key_size * 2:]}
 
-        html = mylib.read_html(race_html_path)
+        html = mylib.read_html(html_path)
 
         tanshou_data = html.xpath('//th[@class="tan"]/following-sibling::td/text()')
         fukushou_data = html.xpath('//th[@class="fuku"]/following-sibling::td/text()')
@@ -34,8 +34,8 @@ class PaybackScraper(mylib.Scraper):
         lap_data = html.xpath('//th[contains(text(), "ラップ")]/following-sibling::td/text()')
         base_data = html.xpath('//th[contains(text(), "ペース")]/following-sibling::td/text()')
 
-        payback_result = {
-            'race_id': race_html_path.stem,
+        result = {
+            'race_id': html_path.stem,
             'tanshou': split_data(tanshou_data),
             'fukushou': split_data(fukushou_data),
             'wakuren': split_data(wakuren_data),
@@ -47,7 +47,7 @@ class PaybackScraper(mylib.Scraper):
             # 'lap_time': lap_data[0],
             # 'base_time': base_data[0],
         }
-        return [payback_result]
+        return [result]
 
 
 if __name__ == '__main__':

@@ -10,11 +10,11 @@ from netkeiba.netkeiba.spiders import mylib as crawl_mylib
 
 
 class HorseScraper(mylib.Scraper):
-    def scrape_from_page(self, horse_html_path):
-        html = mylib.read_html(horse_html_path)
+    def scrape_from_page(self, html_path):
+        html = mylib.read_html(html_path)
 
         result_table_rows = html.xpath('//*[@id="contents"]/div[5]/div/table//tr[not(contains(@align, "center"))]')
-        horse_result_all = []
+        result_all = []
 
         for result_table_row in result_table_rows:
             # 馬名が英語の場合がある ex 2012190002
@@ -49,8 +49,8 @@ class HorseScraper(mylib.Scraper):
                 reward = None
 
             horse_weight = result_table_row.xpath("td[24]")[0].text.split(r"(")
-            horse_result = {
-                "horse_id": horse_html_path.stem,
+            result = {
+                "horse_id": html_path.stem,
                 "race_id": crawl_mylib.get_last_slash_word(result_table_row.xpath("td[5]/a/@href")[0]),  # 数字以外の文字を削除
                 "horse_name": horse_name,  # stripを使う場合はtext()をxpathに埋め込む必要がある
                 "birth_date": html.xpath('//*[@id="db_main_box"]/div[2]/div/div[2]/table//tr[1]/td')[0].text,
@@ -84,9 +84,9 @@ class HorseScraper(mylib.Scraper):
                 "add_horse_weight": horse_weight[1][:-1] if len(horse_weight) >= 2 else None,
                 "reward": reward
             }
-            mylib.delete_space(horse_result)
-            horse_result_all.append(horse_result)
-        return horse_result_all
+            mylib.delete_space(result)
+            result_all.append(result)
+        return result_all
 
 
 if __name__ == '__main__':

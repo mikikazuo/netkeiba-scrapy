@@ -3,11 +3,11 @@ from netkeiba.netkeiba.spiders import mylib as crawl_mylib
 
 
 class RaceScraper(mylib.Scraper):
-    def scrape_from_page(self, race_html_path):
-        html = mylib.read_html(race_html_path)
+    def scrape_from_page(self, html_path):
+        html = mylib.read_html(html_path)
 
         result_table_rows = html.xpath('//table[@class="race_table_01 nk_tb_common"]//tr[position()>1]')
-        race_result_all = []
+        result_all = []
 
         for result_table_row in result_table_rows:
             owner = result_table_row.xpath("diary_snap_cut/td/a/@title")
@@ -23,8 +23,8 @@ class RaceScraper(mylib.Scraper):
             【注意】ファイルから取得する場合は、一部tdがdiary_snap_cutで囲われているためtdの要素数が一致しない
                    ページ表示中はdiary_snap_cutで囲われなくなる。                    
             """
-            race_result = {
-                "race_id": race_html_path.stem,
+            result = {
+                "race_id": html_path.stem,
                 "horse_id": crawl_mylib.get_last_slash_word(result_table_row.xpath("td[4]/a/@href")[0]),
                 "sex": result_table_row.xpath("td[5]")[0].text[0],
                 "age": result_table_row.xpath("td[5]")[0].text[1:],
@@ -36,15 +36,15 @@ class RaceScraper(mylib.Scraper):
             }
 
             race_info = html.xpath("//diary_snap_cut/span")[0].text.split("/")
-            race_result["turn"] = None  # Noneのパターンあり
+            result["turn"] = None  # Noneのパターンあり
             for i in ["左", "右", "直"]:
                 if i in race_info[0]:
-                    race_result["turn"] = i
+                    result["turn"] = i
                     break
-            race_result["outside"] = "外" in race_info[0]
-            race_result["start_time"] = race_info[-1].split(" : ", 1)[-1]
-            race_result_all.append(race_result)
-        return race_result_all
+            result["outside"] = "外" in race_info[0]
+            result["start_time"] = race_info[-1].split(" : ", 1)[-1]
+            result_all.append(result)
+        return result_all
 
 
 if __name__ == '__main__':
