@@ -10,7 +10,7 @@ from analysis.mylib.general import *
 class RaceProcessing(DataframeProcessing):
     def __init__(self):
         # １０万件でおおよそ4年くらいのレースが対象になる　２０万が限界 2past
-        # horse_processing.pyで取得される海外レースのidに英語が含まれていると自動的にstr型になる。
+        # 海外のレースが含まれない範囲の場合、int型になってしまうため手動でstr化 ex.2019J0033009。
         # マージでインデックス型を合わせる必要があるため変換 ex 2019J0033009
         self.df = pd.read_csv(mypath.race_csv, dtype={'race_id': str})
 
