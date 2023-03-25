@@ -7,6 +7,8 @@ scraperでNoneを指定するとcsvファイル上では''空文字で出力さ�
 """
 import pandas as pd
 
+import mypath
+
 
 def print_example(target_filter, title, col=None):
     """
@@ -29,10 +31,10 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
 
     # チェック対象のcsvのパス
-    check_csv_path = "D:/netkeiba/csv_data/horse.csv"
+    check_csv_path = mypath.condition_csv
 
     # チェック結果シートのファイル名
-    output_null_checker_path = 'horse_check.txt'
+    output_null_checker_path = 'condition_check.txt'
 
     # int値が小数にならないようobject型で読み込む
     df = pd.read_csv(check_csv_path, dtype=object)
