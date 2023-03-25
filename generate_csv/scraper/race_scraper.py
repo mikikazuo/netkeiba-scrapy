@@ -25,7 +25,7 @@ class RaceScraper(mylib.Scraper):
             """
             race_result = {
                 "race_id": race_html_path.stem,
-                "horse_id": result_table_row.xpath("td[4]/a/@href")[0][7:-1],
+                "horse_id": crawl_mylib.get_last_slash_word(result_table_row.xpath("td[4]/a/@href")[0]),
                 "sex": result_table_row.xpath("td[5]")[0].text[0],
                 "age": result_table_row.xpath("td[5]")[0].text[1:],
                 "tresen": result_table_row.xpath("td[13]")[0].text.strip()[1],  # 前後に多数の空白があるためstrip処理 ex.200006060207
