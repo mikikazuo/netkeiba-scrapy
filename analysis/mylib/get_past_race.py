@@ -28,8 +28,7 @@ class PastRaceProcessing:
         return merged_frame
 
     def get_past_race(self):
-        horse_id_list = [multi_index[1] for multi_index in self.merged_df_for_past.index]
-        horse_id_list = list(set(horse_id_list))  # 馬idが重複して入っているのでsetを使う
+        horse_id_list = list(set(self.merged_df_for_past.index.get_level_values("horse_id")))  # 馬idが重複して入っているのでsetを使う
         result_list = []
 
         # マルチプロセスにすると遅くなる。引数で渡す変数のサイズが大きいためか？

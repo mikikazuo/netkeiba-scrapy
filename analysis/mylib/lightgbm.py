@@ -61,7 +61,7 @@ class LightGbm:
         self.df_predict["predict"] = self.test_predicted
         df_val_list = []
         removed_ctn = 0
-        for _name, _df in self.df_predict.groupby("race_id"):
+        for race_id, _df in self.df_predict.groupby("race_id"):
             # 1レースにおける全馬の過去データが存在している場合だけ抽出、過去データが不足している馬がいる場合除外。
             if len(_df) == _df.iloc[0]["horse_num"]:
                 df_val_list.append(_df)
