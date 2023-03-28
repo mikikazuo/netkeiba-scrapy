@@ -83,6 +83,8 @@ class HorseProcessing(DataframeProcessing):
         # weightは端数(0.5)ありのためこっち
         self.change_type(["odds", "time", "diff_from_top", "nobori", "weight", "pace_start", "pace_goal"], "float64")
         self.df["order_normalize"] = 1 - (self.df["order"] - 1) / (self.df["horse_num"] - 1).astype("float64")
+
+        # category型にするとなぜか小数点が入る ex.2014110115
         self.change_type(["from", "venue", "weather", "type", "condition", "maker_id", "jockey_id"], "category")
 
         # 加工カラムの追加

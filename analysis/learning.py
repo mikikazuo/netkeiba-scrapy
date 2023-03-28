@@ -6,15 +6,21 @@ if __name__ == "__main__":
     pd.set_option("display.max_columns", None)
     start = time.time()
 
-    horseData = HorseProcessing()
-    raceData = RaceProcessing()
+    race_data = RaceProcessing()
+    horse_data = HorseProcessing()
+    condition_data = ConditionProcessing()
+    yoso_data = YosoProcessing()
+
     paybackData = PaybackProcessing()
 
-    merged_df = raceData.df.merge(horseData.df, on=["race_id", "horse_id"], how="inner")
+    merged_df = race_data.df.merge(horse_data.df, on=["race_id", "horse_id"], how="inner")
+    merged_df = PastRaceProcessing(merged_df).df
+    # レースデータで中止や除外になった馬は、HorseProcessingで弾いているので内部結合で弾く
+    for data in [condition_data, yoso_data]:
+        merged_df = merged_df.merge(data.df, on=["race_id", "horse_id"], how="left")
+    merged_df = yoso_data.categorize(merged_df)
 
-    past_add_data = PastRaceProcessing(merged_df)
-
-    gbm = LightGbm(past_add_data.df)
+    gbm = LightGbm(merged_df)
     df_predict = gbm.makePredictDataset()
     #gbm.protData()
     money = Monetize(df_predict, paybackData.df)

@@ -31,6 +31,7 @@ class PastRaceProcessing:
         horse_id_list = list(set(self.merged_df_for_past.index.get_level_values("horse_id")))  # 馬idが重複して入っているのでsetを使う
         result_list = []
 
+        print('past data adding')
         # マルチプロセスにすると遅くなる。引数で渡す変数のサイズが大きいためか？
         for horse_id in tqdm(horse_id_list):
             result_list.append(self.past_race_id_list(horse_id))

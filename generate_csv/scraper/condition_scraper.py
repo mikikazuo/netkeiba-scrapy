@@ -22,20 +22,24 @@ class ConditionScraper(mylib.Scraper):
                 result = {
                     "race_id": race_id,
                     "horse_id": horse_id,
-                    "condition_score": [int(past.text) for past in
-                                        result_table_row.xpath('td/span[@class="Value_Num"]') + result_table_row.xpath(
-                                            'td/span[@class="Data03"]') if past.text.isdigit()],  # ハイフンがある場合を弾く
+                    "condition_score": int(result_table_row.xpath('td/span[@class="Value_Num"]')[0].text),
+                    # ハイフンがある場合を弾く
+                    "condition_score_past": [int(past.text) for past in
+                                             result_table_row.xpath('td/span[@class="Data03"]') if past.text.isdigit()],
                     "condition_rank": re.sub(r"\D", "", rank[0].text),
-                    "rise_rank": re.sub(r"\D", "", rank[1].text) if rank[1].text else None  # Noneの場合は「初」
+                    "rise_rank": re.sub(r"\D", "", rank[1].text) if rank[1].text else -1  # -1の場合は「初」
                 }
-            # データがそもそもないパターンがある ex.2019J0033009
+            # データがそもそもないパターンがある ex.2019J003300
+            # ただ、過去データが残ってるパターンもある ex.201805010601
             else:
                 result = {
                     "race_id": race_id,
                     "horse_id": horse_id,
-                    "condition_score": None,
-                    "condition_rank": None,
-                    "rise_rank": None
+                    "condition_score": -1,
+                    "condition_score_past": [int(past.text) for past in
+                                             result_table_row.xpath('td/span[@class="Data03"]') if past.text.isdigit()],
+                    "condition_rank": -1,
+                    "rise_rank": -1
                 }
 
             result_all.append(result)
@@ -45,7 +49,7 @@ class ConditionScraper(mylib.Scraper):
 if __name__ == '__main__':
     input_html_dir = "D:/netkeiba/html_data/condition/"
     # スクレイピング結果csvの出力先パス
-    output_csv_path = "D:/netkeiba/csv_data/condition.csv"
+    output_csv_path = "D:/netkeiba/csv_data/condition2.csv"
 
     # race_scraper.pyの取得範囲と合わせる
     ConditionScraper(input_html_dir, output_csv_path, (2017, 2030))
