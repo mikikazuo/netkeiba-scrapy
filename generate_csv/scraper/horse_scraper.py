@@ -12,11 +12,9 @@ from netkeiba.netkeiba.spiders import mylib as crawl_mylib
 class HorseScraper(mylib.Scraper):
     def scrape_from_page(self, html_path):
         html = mylib.read_html(html_path)
-
-        result_table_rows = html.xpath('//*[@id="contents"]/div[5]/div/table//tr[not(contains(@align, "center"))]')
         result_all = []
 
-        for result_table_row in result_table_rows:
+        for race_row in html.xpath('//*[@id="contents"]/div[5]/div/table//tr[not(contains(@align, "center"))]'):
             # 馬名が英語の場合がある ex 2012190002
             # かつては冒頭に「〇外」がついてた。今はコメントに埋め込まれている。 ex 2019110130
             xpath_base = '//*[@id="db_main_box"]/div[1]/div[1]/div[1]/'
@@ -37,49 +35,49 @@ class HorseScraper(mylib.Scraper):
             maker_id = crawl_mylib.get_last_slash_word(maker_id[0]) if maker_id else None
 
             # 空欄や「中」止のパターンがある ex.2018100059
-            order = result_table_row.xpath("td[12]")[0].text
+            order = race_row.xpath("td[12]")[0].text
             if order:
                 order = re.sub(r"\D", "", order)  # (降)の除去 ex.2015103057
 
-            input_jockey = result_table_row.xpath("td[13]/a")
-            jockey = (input_jockey[0].text if len(input_jockey) else result_table_row.xpath("td[13]")[0].text.strip())
+            input_jockey = race_row.xpath("td[13]/a")
+            jockey = input_jockey[0].text if len(input_jockey) else race_row.xpath("td[13]")[0].text.strip()
 
-            reward = result_table_row.xpath("td[28]")[0].text
-            if result_table_row.xpath("td[28]")[0].text == "\xa0":
+            reward = race_row.xpath("td[28]")[0].text
+            if race_row.xpath("td[28]")[0].text == "\xa0":
                 reward = None
 
-            horse_weight = result_table_row.xpath("td[24]")[0].text.split(r"(")
+            horse_weight = race_row.xpath("td[24]")[0].text.split(r"(")
             result = {
                 "horse_id": html_path.stem,
-                "race_id": crawl_mylib.get_last_slash_word(result_table_row.xpath("td[5]/a/@href")[0]),  # 数字以外の文字を削除
+                "race_id": crawl_mylib.get_last_slash_word(race_row.xpath("td[5]/a/@href")[0]),  # 数字以外の文字を削除
                 "horse_name": horse_name,  # stripを使う場合はtext()をxpathに埋め込む必要がある
                 "birth_date": html.xpath('//*[@id="db_main_box"]/div[2]/div/div[2]/table//tr[1]/td')[0].text,
                 "maker_name": maker_name,
                 "maker_id": maker_id,
                 "from": html.xpath('//*[text() = "産地"]/following-sibling::td')[0].text,
                 "sell_price": sell_price,
-                "race_date": result_table_row.xpath("td[1]/a")[0].text.replace("/", "-"),
-                "venue": result_table_row.xpath("td[2]/a")[0].text,
-                "weather": result_table_row.xpath("td[3]")[0].text,
-                "race_name": result_table_row.xpath("td[5]/a")[0].text,
-                "horse_num": result_table_row.xpath("td[7]")[0].text,
-                "wakuban": result_table_row.xpath("td[8]")[0].text,
-                "umaban": result_table_row.xpath("td[9]")[0].text,
-                "odds": result_table_row.xpath("td[10]")[0].text,
-                "popularity": result_table_row.xpath("td[11]")[0].text,
+                "race_date": race_row.xpath("td[1]/a")[0].text.replace("/", "-"),
+                "venue": race_row.xpath("td[2]/a")[0].text,
+                "weather": race_row.xpath("td[3]")[0].text,
+                "race_name": race_row.xpath("td[5]/a")[0].text,
+                "horse_num": race_row.xpath("td[7]")[0].text,
+                "wakuban": race_row.xpath("td[8]")[0].text,
+                "umaban": race_row.xpath("td[9]")[0].text,
+                "odds": race_row.xpath("td[10]")[0].text,
+                "popularity": race_row.xpath("td[11]")[0].text,
                 "order": order,
                 "jockey": jockey,
-                "jockey_id": crawl_mylib.get_last_slash_word(result_table_row.xpath("td[13]/a/@href")[0]) if len(
+                "jockey_id": crawl_mylib.get_last_slash_word(race_row.xpath("td[13]/a/@href")[0]) if len(
                     input_jockey) else None,
-                "weight": result_table_row.xpath("td[14]")[0].text,
-                "type": result_table_row.xpath("td[15]")[0].text[0],  # 障害レースは芝しかないっぽい
-                "length": result_table_row.xpath("td[15]")[0].text[1:],
-                "condition": result_table_row.xpath("td[16]")[0].text,
-                "time": result_table_row.xpath("td[18]")[0].text,
-                "diff_from_top": result_table_row.xpath("td[19]")[0].text,
-                "order_of_corners": result_table_row.xpath("td[21]")[0].text,
-                "pace": result_table_row.xpath("td[22]")[0].text,
-                "nobori": result_table_row.xpath("td[23]")[0].text,
+                "weight": race_row.xpath("td[14]")[0].text,
+                "type": race_row.xpath("td[15]")[0].text[0],  # 障害レースは芝しかないっぽい
+                "length": race_row.xpath("td[15]")[0].text[1:],
+                "condition": race_row.xpath("td[16]")[0].text,
+                "time": race_row.xpath("td[18]")[0].text,
+                "diff_from_top": race_row.xpath("td[19]")[0].text,
+                "order_of_corners": race_row.xpath("td[21]")[0].text,
+                "pace": race_row.xpath("td[22]")[0].text,
+                "nobori": race_row.xpath("td[23]")[0].text,
                 "horse_weight": horse_weight[0] if len(horse_weight) >= 2 else None,
                 "add_horse_weight": horse_weight[1][:-1] if len(horse_weight) >= 2 else None,
                 "reward": reward
@@ -92,10 +90,10 @@ class HorseScraper(mylib.Scraper):
 if __name__ == '__main__':
     input_html_dir = "D:/netkeiba/html_data/horse/"
     # スクレイピング結果csvの出力先パス
-    output_csv_path = "D:/netkeiba/csv_data/horse.csv"
+    output_csv_path = "D:/netkeiba/csv_data/horse_new.csv"
 
     # race_scraper.pyで作成したスクレイピングcsv
-    input_csv_path = 'D:/netkeiba/csv_data/race.csv'
+    input_csv_path = 'D:/netkeiba/csv_data/race_new.csv'
 
     race_df = pd.read_csv(input_csv_path, dtype={"horse_id": str, "race_id": str})
     horse_id_list = list(sorted(set(race_df['horse_id'])))
