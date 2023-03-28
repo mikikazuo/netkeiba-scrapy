@@ -8,6 +8,7 @@ class YosoScraper(mylib.Scraper):
 
         result_table_rows = html.xpath('//div[@class="YosoDeTailList"]')
         result_all = []
+
         for result_table_row in result_table_rows:
             yosoka = result_table_row.xpath('div/div/p[@class="YosoDeTailName"]')[0].text
             yoso_rows = result_table_row.xpath('div[contains(@class,"YosoDeTailItem2")]/table/tbody/tr')

@@ -11,11 +11,11 @@ class ConditionScraper(mylib.Scraper):
         result_all = []
 
         for result_table_row in result_table_rows:
-            rank = result_table_row.xpath('td/span[@class="Value"]')
-
             race_id = html_path.stem
             horse_id = \
                 re.findall('horse_id=(.*)&race_id', result_table_row.xpath('td/dl/dt[@class="Horse"]/a/@href')[0])[0]
+            rank = result_table_row.xpath('td/span[@class="Value"]')
+
             # horse_scraperでcondition(馬場状態)が使われているので注意
             # 過去データ欠けるパターンがある　ex.202306020701
             if len(rank) > 1:
