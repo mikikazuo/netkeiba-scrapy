@@ -69,7 +69,7 @@ class HorseScraper(mylib.Scraper):
                 "jockey": jockey,
                 "jockey_id": crawl_mylib.get_last_slash_word(race_row.xpath("td[13]/a/@href")[0]) if len(
                     input_jockey) else None,
-                "weight": race_row.xpath("td[14]")[0].text,
+                "jockey_weight": race_row.xpath("td[14]")[0].text,
                 "race_type": race_row.xpath("td[15]")[0].text[0],  # 障害レースは芝しかないっぽい
                 "length": race_row.xpath("td[15]")[0].text[1:],
                 "race_condition": race_row.xpath("td[16]")[0].text,

@@ -79,8 +79,8 @@ class HorseProcessing(DataframeProcessing):
         self.change_type(["length", "horse_weight"], "int16")
 
         # TODO rewardの桁数足りないが大丈夫か horse_data.dfList.reward.map(float).max()
-        # weightは端数(0.5)ありのためこっち
-        self.change_type(["odds", "time", "diff_from_top", "nobori", "weight", "pace_start", "pace_goal"], "float64")
+        # jockey_weightは端数(0.5)ありのためこっち
+        self.change_type(["odds", "time", "diff_from_top", "nobori", "jockey_weight", "pace_start", "pace_goal"], "float64")
         self.df["order_normalize"] = 1 - (self.df["order"] - 1) / (self.df["horse_num"] - 1).astype("float64")
 
         # category型にするとなぜか小数点が入る ex.2014110115
