@@ -54,9 +54,8 @@ class HorseProcessing(DataframeProcessing):
         self.df = self.df.dropna(subset=["order", "horse_weight", "pace", "nobori"])
 
         self.df["birth_date"] = self.df["birth_date"].map(lambda x: datetime.datetime.strptime(x, "%Y年%m月%d日").month)
-        self.df["race_date"] = self.df["race_date"].map(lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
+        self.df["race_date"] = self.df["race_date"].map(lambda x: datetime.datetime.strptime(x, "%Y/%m/%d"))
         self.df["race_month"] = self.df["race_date"].map(lambda x: x.month)
-        self.df["venue"] = self.df["venue"].map(lambda x: re.sub(r"\d", "", x))
 
         time_list = self.df["time"].str.split(":")
         time_list = time_list.map(lambda x: list(map(float, x)))
@@ -85,7 +84,7 @@ class HorseProcessing(DataframeProcessing):
         self.df["order_normalize"] = 1 - (self.df["order"] - 1) / (self.df["horse_num"] - 1).astype("float64")
 
         # category型にするとなぜか小数点が入る ex.2014110115
-        self.change_type(["from", "venue", "weather", "type", "condition", "maker_id", "jockey_id"], "category")
+        self.change_type(["from", "venue", "weather", "race_type", "race_condition", "maker_id", "jockey_id"], "category")
 
         # 加工カラムの追加
         self.df["race_cnt"] = 0

@@ -56,8 +56,8 @@ class HorseScraper(mylib.Scraper):
                 "maker_id": maker_id,
                 "from": html.xpath('//*[text() = "産地"]/following-sibling::td')[0].text,
                 "sell_price": sell_price,
-                "race_date": race_row.xpath("td[1]/a")[0].text.replace("/", "-"),
-                "venue": race_row.xpath("td[2]/a")[0].text,
+                "race_date": race_row.xpath("td[1]/a")[0].text,
+                "venue": re.sub(r"\d", "", race_row.xpath("td[2]/a")[0].text),
                 "weather": race_row.xpath("td[3]")[0].text,
                 "race_name": race_row.xpath("td[5]/a")[0].text,
                 "horse_num": race_row.xpath("td[7]")[0].text,
@@ -70,9 +70,9 @@ class HorseScraper(mylib.Scraper):
                 "jockey_id": crawl_mylib.get_last_slash_word(race_row.xpath("td[13]/a/@href")[0]) if len(
                     input_jockey) else None,
                 "weight": race_row.xpath("td[14]")[0].text,
-                "type": race_row.xpath("td[15]")[0].text[0],  # 障害レースは芝しかないっぽい
+                "race_type": race_row.xpath("td[15]")[0].text[0],  # 障害レースは芝しかないっぽい
                 "length": race_row.xpath("td[15]")[0].text[1:],
-                "condition": race_row.xpath("td[16]")[0].text,
+                "race_condition": race_row.xpath("td[16]")[0].text,
                 "time": race_row.xpath("td[18]")[0].text,
                 "diff_from_top": race_row.xpath("td[19]")[0].text,
                 "order_of_corners": race_row.xpath("td[21]")[0].text,
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     output_csv_path = "D:/netkeiba/csv_data/horse_new.csv"
 
     # race_scraper.pyで作成したスクレイピングcsv
-    input_csv_path = 'D:/netkeiba/csv_data/race_new.csv'
+    input_csv_path = 'D:/netkeiba/csv_data/race.csv'
 
     race_df = pd.read_csv(input_csv_path, dtype={"horse_id": str, "race_id": str})
     horse_id_list = list(sorted(set(race_df['horse_id'])))
