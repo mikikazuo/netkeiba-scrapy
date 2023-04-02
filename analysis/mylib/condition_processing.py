@@ -14,10 +14,10 @@ class ConditionProcessing(DataframeProcessing):
         self.df['condition_score_past'] = self.df['condition_score_past'].map(ast.literal_eval)
         # サイト直で過去データを取得した場合はカラム名「_d」の後にインデックスをつける
         for i in range(5):
-            self.df[f'condition_score_d{str(i + 1)}'] = self.df['condition_score_past']
-            self.df[f'condition_score_d{str(i + 1)}'] = self.df[f'condition_score_d{str(i + 1)}'].map(
+            self.df[f'condition_score_d{i + 1}'] = self.df['condition_score_past']
+            self.df[f'condition_score_d{i + 1}'] = self.df[f'condition_score_d{i + 1}'].map(
                 lambda x: x[i] if len(x) > i else -1)
-            self.change_type([f'condition_score_d{str(i + 1)}'], "int8")
+            self.change_type([f'condition_score_d{i + 1}'], "int8")
         self.df = self.df.drop('condition_score_past', axis=1)
 
         self.change_type(['condition_score', 'condition_rank', 'rise_rank'], "int8")
