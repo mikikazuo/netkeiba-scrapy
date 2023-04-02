@@ -21,6 +21,7 @@ class HorseScraper(mylib.Scraper):
             horse_name = html.xpath(xpath_base + "h1/text()")
             horse_name = horse_name[0].strip() if len(horse_name) else \
                 html.xpath(xpath_base + 'p[@class="eng_name"]/text()')[0]
+            color = html.xpath(xpath_base + 'p[@class="txt_01"]/text()')[0].split()[-1]
 
             sell_price = html.xpath('//*[text() = "セリ取引価格"]/following-sibling::td')[0].text
             if "円" not in sell_price:
@@ -51,6 +52,7 @@ class HorseScraper(mylib.Scraper):
                 "horse_id": html_path.stem,
                 "race_id": crawl_mylib.get_last_slash_word(race_row.xpath("td[5]/a/@href")[0]),  # 数字以外の文字を削除
                 "horse_name": horse_name,  # stripを使う場合はtext()をxpathに埋め込む必要がある
+                "color": color,
                 "birth_date": html.xpath('//*[@id="db_main_box"]/div[2]/div/div[2]/table//tr[1]/td')[0].text,
                 "maker_name": maker_name,
                 "maker_id": maker_id,
