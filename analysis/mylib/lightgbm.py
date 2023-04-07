@@ -53,9 +53,9 @@ class LightGbm:
 
         self.predictionAccuracy(predicted_df)
 
-    # ペイバック計算用の予測値を付与したレースごとにまとめたデータリスト作成、他に必要なカラム(order, umabanなど)も追加
+    # ペイバック計算用の予測値を付与したレースごとにまとめたデータリスト作成
     def makePredictDataset(self):
-        df_train, self.df_predict = train_test_split(self.df[self.target_columns + ["order"]], shuffle=False,
+        df_train, self.df_predict = train_test_split(self.df[self.target_columns], shuffle=False,
                                                      test_size=self.test_size)
         # lightgbmの予測値カラムの追加
         self.df_predict["predict"] = self.test_predicted
@@ -71,12 +71,11 @@ class LightGbm:
         return df_val_list
 
     def __init__(self, df):
-        self.pastNum = 2
         # 目的変数カラム
         self.target_col = "order_normalize"
 
         # 答えになってしまうカラム（レース後にわかるデータ）
-        answer_col = [self.target_col] + ["time", "diff_from_top", "nobori", "order", "pace_goal", "pace_start",
+        answer_col = [self.target_col] + ["time", "diff_from_top", "nobori", "pace_goal", "pace_start",
                                           "order_of_corners"]
 
         if DataframeProcessing.is_human:
@@ -88,10 +87,5 @@ class LightGbm:
         # 過去レースとの差分日数を抽出したので用済み
         self.target_columns.remove("race_date")
 
-        # 特例 order_normalizeがあるので不要
-        # for ranker in range(self.pastNum):
-        # self.target_columns.remove("order_" + str(ranker + 1))
-        # self.target_columns.remove('odds_'+str(ranker+1))
         self.df = df
-
         self.training()

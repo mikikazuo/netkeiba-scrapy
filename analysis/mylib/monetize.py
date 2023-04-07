@@ -7,9 +7,11 @@ class Monetize:
     def get_dict(self, df, col):
         return self.df_payback.loc[df.index.get_level_values("race_id")[0]][col]
 
-    def getmax_rev(self, df, top_limit=4, getmin=False):
+    def getmax_rev(self, df, top_limit=4, getmin=True):
         """
         上位のindexを取得
+        :param top_limit: 取得数
+        :param getmin: 少ないほうをとるのかどうか
         """
         return df.nsmallest(top_limit, "predict") if getmin else df.nlargest(top_limit, "predict")
 

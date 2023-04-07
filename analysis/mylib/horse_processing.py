@@ -1,6 +1,3 @@
-import datetime
-import re
-
 import pandas as pd
 from tqdm import tqdm
 
@@ -48,13 +45,13 @@ class HorseProcessing(DataframeProcessing):
         self.df = pd.read_csv(mypath.horse_csv, dtype={'race_id': str})
 
         # 不要列の削除
-        self.df = self.df.drop(["race_name", "horse_name", "sell_price", "maker_name", "jockey", "reward"], axis=1)
+        self.df = self.df.drop(["horse_name", "sell_price", "maker_name", "jockey", "reward"], axis=1)
         # 不要行の削除
         # TODO 中央競馬のみに絞ればここで弾く必要もなくなるのでは？ただその場合過去参照でレースが飛ぶ場合が発生する
         self.df = self.df.dropna(subset=["order", "horse_weight", "pace", "nobori"])
 
-        self.df["birth_date"] = self.df["birth_date"].map(lambda x: datetime.datetime.strptime(x, "%Y年%m月%d日").month)
-        self.df["race_date"] = self.df["race_date"].map(lambda x: datetime.datetime.strptime(x, "%Y/%m/%d"))
+        self.df["birth_date"] = pd.to_datetime(self.df["birth_date"], format="%Y年%m月%d日").map(lambda x: x.month)
+        self.df["race_date"] = pd.to_datetime(self.df["race_date"], format="%Y/%m/%d")
         self.df["race_month"] = self.df["race_date"].map(lambda x: x.month)
 
         time_list = self.df["time"].str.split(":")
@@ -72,19 +69,21 @@ class HorseProcessing(DataframeProcessing):
         self.df["pace_goal"] = pace_list.map(lambda x: x[1])
 
         # TODO sell_priceが空のパターンがないことを確認したのち追加  rewardは現状すべて０
-        self.change_type([
-            "birth_date", "race_month", "horse_num", "wakuban", "umaban",
-            "popularity", "order", "add_horse_weight", "order_of_corners"
-        ], "int8")
+        self.change_type(["birth_date", "race_month", "horse_num", "wakuban", "umaban",
+                          "popularity", "order", "add_horse_weight", "order_of_corners"], "int8")
         self.change_type(["length", "horse_weight"], "int16")
 
         # TODO rewardの桁数足りないが大丈夫か horse_data.dfList.reward.map(float).max()
         # jockey_weightは端数(0.5)ありのためこっち
-        self.change_type(["odds", "time", "diff_from_top", "nobori", "jockey_weight", "pace_start", "pace_goal"], "float64")
-        self.df["order_normalize"] = 1 - (self.df["order"] - 1) / (self.df["horse_num"] - 1).astype("float64")
+        self.change_type(["odds", "time", "diff_from_top", "nobori", "jockey_weight", "pace_start", "pace_goal"],
+                         "float64")
 
-        # category型にするとなぜか小数点が入る ex.2014110115
-        self.change_type(["from", "venue", "weather", "race_type", "race_condition", "maker_id", "jockey_id"], "category")
+        # 順位の標準化
+        self.df["order_normalize"] = (self.df["order"] - 1) / (self.df["horse_num"] - 1).astype("float64")
+
+        self.change_type(
+            ["race_name", "from", "venue", "weather", "race_type", "race_condition", "maker_id", "jockey_id", "color"],
+            "category")
 
         # 加工カラムの追加
         self.df["race_cnt"] = 0
@@ -99,7 +98,7 @@ class HorseProcessing(DataframeProcessing):
 
         self.df = self.df.set_index(["race_id", "horse_id"])
 
+        # set_order_cnt関数で使い終わった後で削除する
+        self.df = self.df.drop("order", axis=1)
         if not self.is_human:
             self.df = self.df.drop(["popularity", "odds"], axis=1)
-
-        self.df = reduce_mem_usage(self.df)

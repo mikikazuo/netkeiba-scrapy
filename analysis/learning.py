@@ -10,15 +10,16 @@ if __name__ == "__main__":
     horse_data = HorseProcessing()
     condition_data = ConditionProcessing()
     yoso_data = YosoProcessing()
-
+    pillar_data = PillarProcessing()
     paybackData = PaybackProcessing()
 
     merged_df = race_data.df.merge(horse_data.df, on=["race_id", "horse_id"], how="inner")
-    merged_df = PastRaceProcessing(merged_df).df
+    #merged_df = PastRaceProcessing(merged_df).df
     # レースデータで中止や除外になった馬は、HorseProcessingで弾いているので内部結合で弾く
-    for data in [condition_data, yoso_data]:
+    for data in [condition_data, yoso_data, pillar_data]:
         merged_df = merged_df.merge(data.df, on=["race_id", "horse_id"], how="left")
     merged_df = yoso_data.categorize(merged_df)
+    pillar_data.update_race_date(merged_df)
 
     gbm = LightGbm(merged_df)
     df_predict = gbm.makePredictDataset()
@@ -31,3 +32,4 @@ if __name__ == "__main__":
 
     process_time = time.time() - start
     print(f'経過時間: {process_time}')
+

@@ -14,27 +14,27 @@ class HorseScraper(mylib.Scraper):
         html = mylib.read_html(html_path)
         result_all = []
 
+        # 馬名が英語の場合がある ex 2012190002
+        # かつては冒頭に「〇外」がついてた。今はコメントに埋め込まれている。 ex 2019110130
+        xpath_base = '//*[@id="db_main_box"]/div[1]/div[1]/div[1]/'
+        horse_name = html.xpath(xpath_base + "h1/text()")
+        horse_name = horse_name[0].strip() if len(horse_name) else \
+            html.xpath(xpath_base + 'p[@class="eng_name"]/text()')[0]
+        color = html.xpath(xpath_base + 'p[@class="txt_01"]/text()')[0].split()[-1]
+
+        sell_price = html.xpath('//*[text() = "セリ取引価格"]/following-sibling::td')[0].text
+        if "円" not in sell_price:
+            sell_price = None
+
+        # 生産者名のタグ構造が異なるパターンがある ex2000190013
+        maker_name = html.xpath('//*[text() = "生産者"]/following-sibling::td/a')
+        maker_name = maker_name[0].text if len(maker_name) else \
+            html.xpath('//*[text() = "生産者"]/following-sibling::td')[0].text
+        # 生産者のidが存在しないパターンがある、あとtdタグになってる ex 2012190003
+        maker_id = html.xpath('//*[text() = "生産者"]/following-sibling::td/a/@href')
+        maker_id = crawl_mylib.get_last_slash_word(maker_id[0]) if maker_id else None
+
         for race_row in html.xpath('//*[@id="contents"]/div[5]/div/table//tr[not(contains(@align, "center"))]'):
-            # 馬名が英語の場合がある ex 2012190002
-            # かつては冒頭に「〇外」がついてた。今はコメントに埋め込まれている。 ex 2019110130
-            xpath_base = '//*[@id="db_main_box"]/div[1]/div[1]/div[1]/'
-            horse_name = html.xpath(xpath_base + "h1/text()")
-            horse_name = horse_name[0].strip() if len(horse_name) else \
-                html.xpath(xpath_base + 'p[@class="eng_name"]/text()')[0]
-            color = html.xpath(xpath_base + 'p[@class="txt_01"]/text()')[0].split()[-1]
-
-            sell_price = html.xpath('//*[text() = "セリ取引価格"]/following-sibling::td')[0].text
-            if "円" not in sell_price:
-                sell_price = None
-
-            # 生産者名のタグ構造が異なるパターンがある ex2000190013
-            maker_name = html.xpath('//*[text() = "生産者"]/following-sibling::td/a')
-            maker_name = maker_name[0].text if len(maker_name) else \
-                html.xpath('//*[text() = "生産者"]/following-sibling::td')[0].text
-            # 生産者のidが存在しないパターンがある、あとtdタグになってる ex 2012190003
-            maker_id = html.xpath('//*[text() = "生産者"]/following-sibling::td/a/@href')
-            maker_id = crawl_mylib.get_last_slash_word(maker_id[0]) if maker_id else None
-
             # 空欄や「中」止のパターンがある ex.2018100059
             order = race_row.xpath("td[12]")[0].text
             if order:
@@ -72,7 +72,7 @@ class HorseScraper(mylib.Scraper):
                 "jockey_id": crawl_mylib.get_last_slash_word(race_row.xpath("td[13]/a/@href")[0]) if len(
                     input_jockey) else None,
                 "jockey_weight": race_row.xpath("td[14]")[0].text,
-                "race_type": race_row.xpath("td[15]")[0].text[0],  # 障害レースは芝しかないっぽい
+                "race_type": race_row.xpath("td[15]")[0].text[0],  # 障害レースは芝とダートが共存するパターンもある？ ex.201609050804
                 "length": race_row.xpath("td[15]")[0].text[1:],
                 "race_condition": race_row.xpath("td[16]")[0].text,
                 "time": race_row.xpath("td[18]")[0].text,
@@ -92,7 +92,7 @@ class HorseScraper(mylib.Scraper):
 if __name__ == '__main__':
     input_html_dir = "D:/netkeiba/html_data/horse/"
     # スクレイピング結果csvの出力先パス
-    output_csv_path = "D:/netkeiba/csv_data/horse_new.csv"
+    output_csv_path = "D:/netkeiba/csv_data/horse.csv"
 
     # race_scraper.pyで作成したスクレイピングcsv
     input_csv_path = 'D:/netkeiba/csv_data/race.csv'

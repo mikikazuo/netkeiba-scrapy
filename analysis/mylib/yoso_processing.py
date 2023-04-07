@@ -17,8 +17,8 @@ class YosoProcessing(DataframeProcessing):
         for index, yosoka in enumerate(self.df['yosoka'].unique()):
             filtered_yosoka_df = self.df.loc[self.df['yosoka'] == yosoka]
             filtered_yosoka_df = filtered_yosoka_df.drop('yosoka', axis=1)
-            filtered_yosoka_df = filtered_yosoka_df.rename(columns={'yoso': f'yoso_d{index + 1}'})
-            self.yoso_columns.append(f'yoso_d{index + 1}')
+            filtered_yosoka_df = filtered_yosoka_df.rename(columns={'yoso': f'yoso_{index + 1}'})
+            self.yoso_columns.append(f'yoso_{index + 1}')
             merged_df = filtered_yosoka_df if merged_df is None else merged_df.merge(filtered_yosoka_df,
                                                                                      on=["race_id", "horse_id"],
                                                                                      how='outer')
