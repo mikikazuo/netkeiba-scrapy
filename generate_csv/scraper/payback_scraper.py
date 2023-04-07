@@ -53,7 +53,7 @@ class PaybackScraper(mylib.Scraper):
 if __name__ == '__main__':
     input_html_dir = "D:/netkeiba/html_data/race/"
     # スクレイピング結果csvの出力先パス
-    output_csv_path = "D:/netkeiba/csv_data/paybackdeb.csv"
+    output_csv_path = "D:/netkeiba/csv_data/payback.csv"
 
     # race_scraper.pyの取得範囲と合わせる
     PaybackScraper(input_html_dir, output_csv_path, (2017, 2030))
