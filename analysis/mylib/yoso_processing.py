@@ -28,13 +28,11 @@ class YosoProcessing(DataframeProcessing):
         """
         元々予想家がいなかったのか外れ予想なのかを区別し、dtypeを変更する
         """
-        categorized_df = merged_df
         print('yoso categorizing')
         for race_id, df in tqdm(merged_df.groupby("race_id")):
             for column in self.yoso_columns:
-                categorized_df.loc[race_id, column] = df[column].fillna(
-                    'None' if categorized_df.loc[race_id, column].isnull().all() else 'Hazure')
+                merged_df.loc[race_id, column] = df[column].fillna(
+                    'None' if merged_df.loc[race_id, column].isnull().all() else 'Hazure')
 
         for col in self.yoso_columns:
-            categorized_df[col] = categorized_df[col].astype("category")
-        return categorized_df
+            merged_df[col] = merged_df[col].astype("category")

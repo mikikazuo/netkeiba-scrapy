@@ -77,8 +77,6 @@ class PillarProcessing(DataframeProcessing):
         """
         日付差へ更新
         """
-        updated_df = merged_df
         for i in range(1, self.past_max + 1):
-            updated_df[f'race_date_{i}'] = (updated_df["race_date"] - updated_df[f'race_date_{i}']).map(
+            merged_df[f'race_date_{i}'] = (merged_df["race_date"] - merged_df[f'race_date_{i}']).map(
                 lambda x: x.days).astype("int16")
-        return updated_df
