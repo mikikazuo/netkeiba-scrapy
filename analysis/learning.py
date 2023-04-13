@@ -11,6 +11,7 @@ if __name__ == "__main__":
     condition_data = ConditionProcessing()
     yoso_data = YosoProcessing()
     pillar_data = PillarProcessing()
+    jockey_profile = JockeyProfileProcessing()
     paybackData = PaybackProcessing()
 
     merged_df = race_data.df.merge(horse_data.df, on=["race_id", "horse_id"], how="inner")
@@ -18,8 +19,16 @@ if __name__ == "__main__":
     # レースデータで中止や除外になった馬は、HorseProcessingで弾いているので内部結合で弾く
     for data in [condition_data, pillar_data]:  # , yoso_data]:
         merged_df = merged_df.merge(data.df, on=["race_id", "horse_id"], how="left")
+    # 異なる列でマージするとインデックスがリセットされるため一時保存して、再設定
+    index = merged_df.index
+    merged_df = merged_df.merge(jockey_profile.df, on="jockey_id", how="left")
+    merged_df.index = index
     pillar_data.update_race_date(merged_df)
+    jockey_profile.update_date(merged_df)
     # yoso_data.categorize(merged_df)
+
+    # マージ使用後用済み
+    merged_df['jockey_id'] = merged_df['jockey_id'].astype("category")
 
     gbm = LightGbm(merged_df)
     df_predict = gbm.makePredictDataset()
@@ -31,5 +40,6 @@ if __name__ == "__main__":
     money.check_payback(['umatan'], True, [[0, 1], [1, 0], [0, 2], [1, 2], [2, 0]])
     money.check_payback(['sanrenpuku'], False, [[0, 1, 2], [0, 1, 3], [0, 2, 3], [1, 2, 3]])
     money.check_payback(['sanrentan'], True, [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]])
+
     process_time = time.time() - start
     print(f'経過時間: {process_time}')

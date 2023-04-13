@@ -82,7 +82,7 @@ class HorseProcessing(DataframeProcessing):
         self.df["order_normalize"] = (self.df["order"] - 1) / (self.df["horse_num"] - 1).astype("float64")
 
         self.change_type(
-            ["race_name", "from", "venue", "weather", "race_type", "race_condition", "maker_id", "jockey_id", "color"],
+            ["race_name", "from", "venue", "weather", "race_type", "race_condition", "maker_id", "color"],
             "category")
 
         # 加工カラムの追加

@@ -8,3 +8,4 @@ from .payback_processing import *
 from .pillar_processing import *
 from .race_processing import *
 from .yoso_processing import *
+from .jockey_profile_processing import *
