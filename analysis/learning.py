@@ -12,6 +12,7 @@ if __name__ == "__main__":
     yoso_data = YosoProcessing()
     pillar_data = PillarProcessing()
     jockey_profile = JockeyProfileProcessing()
+    jockey_result_profile = JockeyResultProcessing()
     paybackData = PaybackProcessing()
 
     merged_df = race_data.df.merge(horse_data.df, on=["race_id", "horse_id"], how="inner")
@@ -19,12 +20,11 @@ if __name__ == "__main__":
     # レースデータで中止や除外になった馬は、HorseProcessingで弾いているので内部結合で弾く
     for data in [condition_data, pillar_data]:  # , yoso_data]:
         merged_df = merged_df.merge(data.df, on=["race_id", "horse_id"], how="left")
-    # 異なる列でマージするとインデックスがリセットされるため一時保存して、再設定
-    index = merged_df.index
-    merged_df = merged_df.merge(jockey_profile.df, on="jockey_id", how="left")
-    merged_df.index = index
+
+    merged_df = jockey_profile.merge(merged_df)
+    merged_df = jockey_result_profile.merge(merged_df)
+
     pillar_data.update_race_date(merged_df)
-    jockey_profile.update_date(merged_df)
     # yoso_data.categorize(merged_df)
 
     # マージ使用後用済み

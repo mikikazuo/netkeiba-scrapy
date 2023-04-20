@@ -40,6 +40,10 @@ class HorseProcessing(DataframeProcessing):
                 "float64")
             self.df = self.df.drop(cnt_column, axis=1)
 
+        # 指定順位以上を集計
+        self.df["order_2_cnt_normalize"] += self.df["order_1_cnt_normalize"]
+        self.df["order_3_cnt_normalize"] += self.df["order_2_cnt_normalize"]
+
     def __init__(self):
         # 海外のレースが含まれない範囲の場合、int型になってしまうため手動でstr化 ex.2019J0033009
         self.df = pd.read_csv(mypath.horse_csv, dtype={'race_id': str})

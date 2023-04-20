@@ -31,5 +31,4 @@ if __name__ == '__main__':
     # スクレイピング結果csvの出力先パス
     output_csv_path = "D:/netkeiba/csv_data/jockey_profile.csv"
 
-    # race_scraper.pyの取得範囲と合わせる
     JockeyProfileScraper(input_html_dir, output_csv_path)
