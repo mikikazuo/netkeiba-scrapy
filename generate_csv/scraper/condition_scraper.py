@@ -46,7 +46,7 @@ class ConditionScraper(mylib.Scraper):
 if __name__ == '__main__':
     input_html_dir = "D:/netkeiba/html_data/condition/"
     # スクレイピング結果csvの出力先パス
-    output_csv_path = "D:/netkeiba/csv_data/condition2.csv"
+    output_csv_path = "D:/netkeiba/csv_data/condition.csv"
 
     # race_scraper.pyの取得範囲と合わせる
     ConditionScraper(input_html_dir, output_csv_path, (2017, 2030))
