@@ -8,6 +8,8 @@ from multiprocessing import Pool
 import lxml.html
 from tqdm import tqdm
 
+import mypath
+
 
 def confirm_exist_file_delete(path):
     """
@@ -104,6 +106,8 @@ class Scraper(metaclass=ABCMeta):
                 # マルチプロセスで同時に参照するhtmlのパスリスト
                 pooled_path = []
                 for i, html_path in enumerate(tqdm(self.html_path_list)):
+                    if mypath.debug_idx and i < mypath.debug_idx:
+                        continue
                     pooled_path.append(html_path)
                     # 多すぎる場合一括だと逆に遅くなるため、一定数ごとにcsvに書き込み。
                     if i > 0 and i % os.cpu_count() == 0:

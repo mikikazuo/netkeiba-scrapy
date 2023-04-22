@@ -35,6 +35,7 @@ class JockeyProfileProcessing(DataframeProcessing):
         merged_df['jockey_debut'] = merged_df['race_date'].map(lambda x: x.year) - merged_df['jockey_debut'].astype(
             'int16')
         merged_df['jockey_debut'] = merged_df['jockey_debut'].map(lambda x: -1 if x < 0 else x).astype('int8')
-        merged_df["jockey_birth_date"] = self.df["jockey_birth_date"].map(lambda x: x.month).astype('int8')
+
+        merged_df = merged_df.drop(["jockey_birth_date"], axis=1)
 
         return merged_df

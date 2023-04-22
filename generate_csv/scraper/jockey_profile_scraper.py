@@ -29,6 +29,6 @@ class JockeyProfileScraper(mylib.Scraper):
 if __name__ == '__main__':
     input_html_dir = "D:/netkeiba/html_data/jockey_profile/"
     # スクレイピング結果csvの出力先パス
-    output_csv_path = "D:/netkeiba/csv_data/jockey_profile.csv"
+    output_csv_path = "D:/netkeiba/csv_data/common/jockey_profile.csv"
 
     JockeyProfileScraper(input_html_dir, output_csv_path)

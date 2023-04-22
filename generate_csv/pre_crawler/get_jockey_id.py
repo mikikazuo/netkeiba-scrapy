@@ -34,7 +34,7 @@ if __name__ == '__main__':
     race_path_list = sum([list(pathlib.Path(input_html_dir).glob(year + '*')) for year in map(str, range(1986, 2050))],
                          [])
     # 出力する馬id一覧csvファイル
-    output_csv_path = 'D:/netkeiba/csv_data/all_jockey_id.csv'
+    output_csv_path = 'D:/netkeiba/csv_data/common/all_jockey_id.csv'
 
     all_jockey_set = set()
     mylib.confirm_exist_file_delete(output_csv_path)

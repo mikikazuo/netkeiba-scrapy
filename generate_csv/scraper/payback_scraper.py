@@ -1,3 +1,4 @@
+import mypath
 from generate_csv import mylib
 
 
@@ -56,4 +57,4 @@ if __name__ == '__main__':
     output_csv_path = "D:/netkeiba/csv_data/payback.csv"
 
     # race_scraper.pyの取得範囲と合わせる
-    PaybackScraper(input_html_dir, output_csv_path, (2017, 2030))
+    PaybackScraper(input_html_dir, output_csv_path, (mypath.start_year, mypath.end_year))

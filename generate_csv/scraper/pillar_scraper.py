@@ -1,5 +1,6 @@
 import re
 
+import mypath
 from generate_csv import mylib
 from netkeiba.netkeiba.spiders import mylib as crawl_mylib
 
@@ -54,8 +55,12 @@ class PillarScraper(mylib.Scraper):
                 result[f'horse_num_{idx}'] = re.sub(r"\D", "", row_4[0])
                 result[f'umaban_{idx}'] = re.sub(r"\D", "", row_4[1])
                 result[f'popularity_{idx}'] = re.sub(r"\D", "", row_4[2])
-                result[f'jockey_{idx}'] = row_4[3]
-                result[f'jockey_weight_{idx}'] = row_4[4]
+                if len(row_4) > 4:
+                    result[f'jockey_{idx}'] = row_4[3]
+                    result[f'jockey_weight_{idx}'] = row_4[4]
+                else:  # ex (race_id=200903020208, horse_id=2005110104)の４つ目の過去で騎手名が欠けて要素数不足になっている
+                    result[f'jockey_{idx}'] = None
+                    result[f'jockey_weight_{idx}'] = row_4[3]
 
                 row_5 = past_row.xpath('div[@class="Data06"]')[0].text
                 not_kakko_list = re.sub(r"\(.*?\)", "", row_5).split()
@@ -81,5 +86,6 @@ if __name__ == '__main__':
     # スクレイピング結果csvの出力先パス
     output_csv_path = "D:/netkeiba/csv_data/pillar.csv"
 
+    start_year = 2008 if mypath.start_year < 2008 else mypath.start_year
     # race_scraper.pyの取得範囲と合わせる
-    PillarScraper(input_html_dir, output_csv_path, (2017, 2030))
+    PillarScraper(input_html_dir, output_csv_path, (start_year, mypath.end_year))

@@ -36,10 +36,11 @@ class HorseProcessing(DataframeProcessing):
         """
         for target_order in range(1, 4):
             cnt_column = "order_" + str(target_order) + "_cnt"
-            self.df["order_" + str(target_order) + "_cnt_normalize"] = self.df[cnt_column] / self.df["race_cnt"].astype(
+            self.df[f"order_{target_order}_cnt_normalize"] = self.df[cnt_column] / self.df["race_cnt"].astype(
                 "float64")
             self.df = self.df.drop(cnt_column, axis=1)
-
+            # 0/0の時にNanとなるため0に置き換え
+            self.df[f"order_{target_order}_cnt_normalize"] = self.df[f"order_{target_order}_cnt_normalize"].fillna(0)
         # 指定順位以上を集計
         self.df["order_2_cnt_normalize"] += self.df["order_1_cnt_normalize"]
         self.df["order_3_cnt_normalize"] += self.df["order_2_cnt_normalize"]
@@ -85,6 +86,8 @@ class HorseProcessing(DataframeProcessing):
         # 順位の標準化
         self.df["order_normalize"] = (self.df["order"] - 1) / (self.df["horse_num"] - 1).astype("float64")
 
+        # 名前は存在するがリンク先idがないパターン ex.2019190004
+        self.df['maker_id'] = self.df['maker_id'].fillna('None')
         self.change_type(
             ["race_name", "from", "venue", "weather", "race_type", "race_condition", "maker_id", "color"],
             "category")

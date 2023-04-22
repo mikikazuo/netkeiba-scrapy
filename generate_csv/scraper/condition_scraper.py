@@ -1,5 +1,6 @@
 import re
 
+import mypath
 from generate_csv import mylib
 
 
@@ -48,5 +49,6 @@ if __name__ == '__main__':
     # スクレイピング結果csvの出力先パス
     output_csv_path = "D:/netkeiba/csv_data/condition.csv"
 
+    start_year = 2017 if mypath.start_year < 2017 else mypath.start_year
     # race_scraper.pyの取得範囲と合わせる
-    ConditionScraper(input_html_dir, output_csv_path, (2017, 2030))
+    ConditionScraper(input_html_dir, output_csv_path, (start_year, mypath.end_year))

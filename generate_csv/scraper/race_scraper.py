@@ -1,3 +1,4 @@
+import mypath
 from generate_csv import mylib
 from netkeiba.netkeiba.spiders import mylib as crawl_mylib
 
@@ -34,7 +35,7 @@ class RaceScraper(mylib.Scraper):
             }
 
             race_info = html.xpath("//diary_snap_cut/span")[0].text.split("/")
-            result["turn"] = None  # Noneのパターンあり
+            result["turn"] = None  # Noneのパターンあり（障害レース）
             for i in ["左", "右", "直"]:
                 if i in race_info[0]:
                     result["turn"] = i
@@ -50,4 +51,5 @@ if __name__ == '__main__':
     # スクレイピング結果csvの出力先パス
     output_csv_path = "D:/netkeiba/csv_data/race.csv"
 
-    RaceScraper(input_html_dir, output_csv_path, (2017, 2030))
+    start_year = 1986 if mypath.start_year < 1986 else mypath.start_year
+    RaceScraper(input_html_dir, output_csv_path, (mypath.start_year, mypath.end_year))

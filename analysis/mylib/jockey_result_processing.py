@@ -45,7 +45,7 @@ class JockeyResultProcessing(DataframeProcessing):
                 0)
 
         # 不要列の削除
-        self.df = self.df.drop(["jockey_result_year"], axis=1)
+        picked_df = picked_df.drop(["jockey_result_year"], axis=1)
 
         picked_df.index = merged_df.index
         return pd.concat([merged_df, picked_df], axis=1)

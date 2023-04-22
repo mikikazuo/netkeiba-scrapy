@@ -57,8 +57,9 @@ class PillarProcessing(DataframeProcessing):
             self.change_type([f'time_{i}', f'jockey_weight_{i}', f'nobori_{i}', f'diff_from_top_{i}'], 'float64')
 
             self.df[f'speed_{i}'] = self.df[f'length_{i}'] / self.df[f'time_{i}']
-            # 未登録の場合（length_{i}が-1、time_{i}が0）のとき-infとなるため置き換える
-            self.df[f'speed_{i}'] = self.df[f'speed_{i}'].replace(-np.inf, 0)
+            # 未登録の場合（length_{i}が-1でtime_{i}が0）のときinf、（length_{i}が正常値でtime_{i}が取得不能を表す0）のときinfとなるため置き換える
+            # なお、infを変えても結果は特に変わらなかった
+            self.df[f'speed_{i}'] = self.df[f'speed_{i}'].replace(-np.inf, -1).replace(np.inf, -1)
 
             # 順位の標準化
             self.df[f'order_normalize_{i}'] = (self.df[f'order_{i}'] - 1) / (self.df[f'horse_num_{i}'] - 1).astype(

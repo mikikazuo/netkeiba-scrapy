@@ -1,3 +1,4 @@
+import mypath
 from generate_csv import mylib
 from netkeiba.netkeiba.spiders import mylib as crawl_mylib
 
@@ -32,5 +33,6 @@ if __name__ == '__main__':
     # スクレイピング結果csvの出力先パス
     output_csv_path = "D:/netkeiba/csv_data/yoso.csv"
 
+    start_year = 2012 if mypath.start_year < 2012 else mypath.start_year
     # race_scraper.pyの取得範囲と合わせる
-    YosoScraper(input_html_dir, output_csv_path, (2017, 2030))
+    YosoScraper(input_html_dir, output_csv_path, (start_year, mypath.end_year))
