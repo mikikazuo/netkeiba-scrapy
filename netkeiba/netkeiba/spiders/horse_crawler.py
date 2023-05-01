@@ -16,20 +16,22 @@ class HorseCrawlerSpider(scrapy.Spider):
     # 馬データhtmlの出力先ディレクトリパス
     output_html_dir = 'D:/netkeiba/html_data/horse/'
 
-    def __init__(self, start_year=1986, *args, **kwargs):
+    def start_requests(self):
         """
-        起動コマンド　scrapy crawl horse_crawler -a start_year=[開始年]
-
-        :param start_year: 「更新」範囲の開始年度。この年度以降にレースに出場した馬データhtmlを取得し直す。
+        __init__でのself.start_urls指定では、referer参照で二重にクロールされていたが、本関数ではそれが解消できた。
+        TODO 他のクロールではどうなのか再検証
         """
-        super(HorseCrawlerSpider, self).__init__(*args, **kwargs)
+        start_year = 2009
         mylib.make_output_dir(self.output_html_dir)
 
         race_df = pd.read_csv(self.input_csv_path, dtype={"horse_id": str, "race_id": str})
         horse_id_list = list(
             sorted(set(race_df.loc[race_df["race_id"] >= str(start_year) + '00000000', :]['horse_id'])))
-        self.start_urls = [self.base_url + x for x in horse_id_list]
-        print('クロール対象数:' + str(len(self.start_urls)))
+
+        start_urls = [self.base_url + x for x in horse_id_list]
+        print('クロール対象数:' + str(len(start_urls)))
+        for q in start_urls:
+            yield scrapy.Request(q)
 
     def parse(self, response):
         yield scrapy.Request(url=response.url, callback=self.horse_parse)
