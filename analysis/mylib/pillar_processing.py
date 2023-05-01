@@ -9,6 +9,7 @@ class PillarProcessing(DataframeProcessing):
     past_max = 5
 
     def __init__(self):
+        print('pillar start')
         # 海外のレースが含まれない範囲の場合、int型になってしまうため手動でstr化 ex.2019J0033009
         self.df = pd.read_csv(mypath.pillar_csv, dtype={'race_id': str})
         self.change_type([f'run_type'], 'int8')
@@ -19,15 +20,14 @@ class PillarProcessing(DataframeProcessing):
                     self.df = self.df.drop(column, axis=1)
 
         for i in range(1, self.past_max + 1):
-            # コロン(:)がないパターンがあるため修正 人的表記ミス ex.201901010311 チャンピオ
-            self.df[f'time_{i}'] = self.df[f'time_{i}'].replace('2.28.76', '2:28.76')
-
             self.df[f'order_{i}'] = self.df[f'order_{i}'].replace('除', -100).replace('中', -100) \
                 .replace('取', -100).replace('降', -100).replace('失', -100)
 
             # 空白埋め
             self.df[f'race_date_{i}'] = self.df[f'race_date_{i}'].fillna('1900.01.01')
             self.df[f'time_{i}'] = self.df[f'time_{i}'].fillna('0:0')
+            # タイムにコロン(:)がないパターンがあるため修正 人的表記ミス ex.201901010311 チャンピオ
+            self.df[f'time_{i}'] = self.df[f'time_{i}'].map(lambda x: x.replace('.', ':', 1) if ':' not in x else x)
 
             # 後々ハイフンで分割するため負の数はNG
             self.df[f'order_of_corners_{i}'] = self.df[f'order_of_corners_{i}'].fillna('0')
@@ -74,10 +74,15 @@ class PillarProcessing(DataframeProcessing):
 
         self.df = self.df.set_index(['race_id', 'horse_id'])
 
-    def update_race_date(self, merged_df):
+    def update_race_date(self, merged_df_cp):
         """
         日付差へ更新
         """
+        # 不要レース馬柱一式の削除
+        index_list = merged_df_cp[merged_df_cp["race_date_1"].isnull()]["race_date_1"].index.map(lambda x: x[0])
+        merged_df = merged_df_cp.drop(index_list)
+        # 馬柱で欠けているパターンがある（取得データが2009年からの場合） ex.201005050810 馬番12
         for i in range(1, self.past_max + 1):
             merged_df[f'race_date_{i}'] = (merged_df["race_date"] - merged_df[f'race_date_{i}']).map(
                 lambda x: x.days).astype("int16")
+        return merged_df

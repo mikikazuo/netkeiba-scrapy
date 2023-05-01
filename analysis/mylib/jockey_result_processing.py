@@ -8,6 +8,7 @@ class JockeyResultProcessing(DataframeProcessing):
     yoso_columns = []
 
     def __init__(self):
+        print('jockey result start')
         # 海外のレースが含まれない範囲の場合、int型になってしまうため手動でstr化 ex.2019J0033009
         self.df = pd.read_csv(mypath.jockey_result_csv, dtype={'jockey_id': str}, index_col='jockey_id')
         # 不要行の削除 年度は端っこなので合計値の算出には特に影響しない　ex.00525

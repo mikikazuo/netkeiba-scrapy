@@ -6,6 +6,7 @@ from analysis.mylib.general import *
 
 class JockeyProfileProcessing(DataframeProcessing):
     def __init__(self):
+        print('jockey profile start')
         # 地方競馬メインの騎手だとアルファベットが入りstr型になるが中央のみの場合int型になるためstrで明示
         self.df = pd.read_csv(mypath.jockey_profile_csv, dtype={'jockey_id': object}, index_col=["jockey_id"])
 

@@ -8,8 +8,8 @@ if __name__ == "__main__":
 
     race_data = RaceProcessing()
     horse_data = HorseProcessing()
-    condition_data = ConditionProcessing()
-    yoso_data = YosoProcessing()
+    # condition_data = ConditionProcessing()
+    # yoso_data = YosoProcessing()
     pillar_data = PillarProcessing()
     jockey_profile = JockeyProfileProcessing()
     jockey_result_profile = JockeyResultProcessing()
@@ -18,18 +18,16 @@ if __name__ == "__main__":
     merged_df = race_data.df.merge(horse_data.df, on=["race_id", "horse_id"], how="inner")
     # merged_df = PastRaceProcessing(merged_df).df
     # レースデータで中止や除外になった馬は、HorseProcessingで弾いているので内部結合で弾く
-    for data in [condition_data, pillar_data]:  # , yoso_data]:
+    for data in [pillar_data]:  # , condition_data, yoso_data]:
         merged_df = merged_df.merge(data.df, on=["race_id", "horse_id"], how="left")
 
     merged_df = jockey_profile.merge(merged_df)
     merged_df = jockey_result_profile.merge(merged_df)
-
-    pillar_data.update_race_date(merged_df)
+    merged_df = pillar_data.update_race_date(merged_df)
     # yoso_data.categorize(merged_df)
 
     # マージ使用後用済み
     merged_df['jockey_id'] = merged_df['jockey_id'].astype("category")
-
     gbm = LightGbm(merged_df)
     df_predict = gbm.makePredictDataset()
     # gbm.protData()

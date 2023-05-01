@@ -17,6 +17,7 @@ def str_to_dict(str_data):
 
 class PaybackProcessing:
     def __init__(self):
+        print('payback start')
         # 海外のレースが含まれない範囲の場合、int型になってしまうため手動でstr化 ex.2019J0033009
         self.df = pd.read_csv(mypath.payback_csv, dtype={'race_id': str}, index_col="race_id")
         for column in self.df.columns:
