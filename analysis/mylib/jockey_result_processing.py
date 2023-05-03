@@ -14,7 +14,7 @@ class JockeyResultProcessing(DataframeProcessing):
         # 不要行の削除 年度は端っこなので合計値の算出には特に影響しない　ex.00525
         self.df = self.df.dropna(subset=["jockey_result_order_1_cnt"])
 
-        self.float_column = ["order_1_normalize", "order_1_2_normalize", "order_1_2_3_normalize", "prize"]
+        self.float_column = ["order_1_nor", "order_1_2_nor", "order_1_2_3_nor", "prize"]
         self.float_column = [f"jockey_result_{column}" for column in self.float_column]
 
         self.change_type(list(set(self.df.columns) - set(self.float_column)), "int16")

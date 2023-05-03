@@ -62,8 +62,7 @@ class PillarProcessing(DataframeProcessing):
             self.df[f'speed_{i}'] = self.df[f'speed_{i}'].replace(-np.inf, -1).replace(np.inf, -1)
 
             # 順位の標準化
-            self.df[f'order_normalize_{i}'] = (self.df[f'order_{i}'] - 1) / (self.df[f'horse_num_{i}'] - 1).astype(
-                'float64')
+            self.df[f'order_nor_{i}'] = (self.df[f'order_{i}'] - 1) / (self.df[f'horse_num_{i}'] - 1).astype('float64')
             self.df = self.df.drop(f'order_{i}', axis=1)
 
             self.change_type([f'venue_{i}', f'race_name_{i}', f'kakko_{i}', f'outside_{i}', f'race_type_{i}',

@@ -10,8 +10,7 @@ class JockeyResultScraper(mylib.Scraper):
             columns = ["order", "order_1_cnt", "order_2_cnt", "order_3_cnt", "order_out_cnt",
                        "grand_cnt", "grand_order_1_cnt", "special_cnt", "special_order_1_cnt",
                        "flat_cnt", "flat_order_1_cnt", "grass_cnt", "grass_order_1_cnt",
-                       "dirt_cnt", "dirt_order_1_cnt", "order_1_normalize", "order_1_2_normalize",
-                       "order_1_2_3_normalize", "prize"]
+                       "dirt_cnt", "dirt_order_1_cnt", "order_1_nor", "order_1_2_nor", "order_1_2_3_nor", "prize"]
             columns = [f"jockey_result_{column}" for column in columns]
             result = {
                 "jockey_id": html_path.stem,

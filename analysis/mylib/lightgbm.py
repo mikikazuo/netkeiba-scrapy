@@ -72,7 +72,7 @@ class LightGbm:
 
     def __init__(self, df):
         # 目的変数カラム
-        self.target_col = "order_normalize"
+        self.target_col = "order_nor"
 
         # 答えになってしまうカラム（レース後にわかるデータ）
         answer_col = [self.target_col] + ["time", "diff_from_top", "nobori", "pace_goal", "pace_start",

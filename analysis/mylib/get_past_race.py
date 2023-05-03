@@ -46,7 +46,7 @@ class PastRaceProcessing:
         common_columns = ["birth_date", "from", "maker_id", "sex", "trainer_id", "tresen", "race_cnt", "order"]
         # 過去のカウント系の除外
         for order_idx in range(3):
-            common_columns.append("order_" + str(order_idx + 1) + "_cnt_normalize")
+            common_columns.append("order_" + str(order_idx + 1) + "_cnt_nor")
 
         # ソートのためにtarget_columnsにrace_dateを含めること
         target_columns = list(set(merged_df.columns) - set(common_columns))
