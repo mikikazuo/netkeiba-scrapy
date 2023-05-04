@@ -12,19 +12,18 @@ class ConditionCrawlerSpider(scrapy.Spider):
     # 調子偏差値htmlの出力先ディレクトリパス
     output_html_dir = 'D:/netkeiba/html_data/condition/'
 
-    def __init__(self, start_year=2017, *args, **kwargs):
+    def start_requests(self):
         """
-        起動コマンド　scrapy crawl condition_crawler -a start_year=[開始年]
-
+        「取得」
         調子偏差値は2017年1月から導入されている。区切りがいい1月からなのでparseで弾く条件文は書いていない。
-
-        :param start_year: 「取得」範囲の開始年度。
         """
-        super(ConditionCrawlerSpider, self).__init__(*args, **kwargs)
+        start_year = 2017
         mylib.make_output_dir(self.output_html_dir)
 
-        self.start_urls = mylib.make_urls_depend_race_id(self.base_url, start_year)
-        print('クロール対象数:' + str(len(self.start_urls)))
+        start_urls = mylib.make_urls_depend_race_id(self.base_url, start_year)
+        print('クロール対象数:' + str(len(start_urls)))
+        for q in start_urls:
+            yield scrapy.Request(q)
 
     def parse(self, response):
         yield scrapy.Request(url=response.url, callback=self.condition_parse)

@@ -26,6 +26,7 @@ class JockeyProfileProcessing(DataframeProcessing):
         self.change_type(['jockey_from', 'jockey_blood_type'], "category")
 
     def merge(self, merged_df_base):
+        print('jockey_profile.merge')
         # 異なる列でマージするとインデックスがリセットされるため一時保存して、再設定
         index = merged_df_base.index
         merged_df = merged_df_base.merge(self.df, on="jockey_id", how="left")

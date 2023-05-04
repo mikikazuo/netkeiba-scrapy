@@ -13,19 +13,20 @@ class PillarCrawlerSpider(scrapy.Spider):
     # 馬柱htmlの出力先ディレクトリパス
     output_html_dir = 'D:/netkeiba/html_data/pillar/'
 
-    def __init__(self, start_year=2007, *args, **kwargs):
+    def start_requests(self):
         """
-        起動コマンド　scrapy crawl pillar_crawler -a start_year=[開始年]
-
+        「更新」
         馬柱は2007年7月28日から表示される
 
-        :param start_year: 「更新」範囲の開始年度。過去の履歴が追加されているので、念のため最後にクロールしたタイミングの３年前から取得しなおしたほうがいい。
+        過去の履歴が追加されているので、念のため最後にクロールしたタイミングの３年前から取得しなおしたほうがいい。
         """
-        super(PillarCrawlerSpider, self).__init__(*args, **kwargs)
+        start_year = 2007
         mylib.make_output_dir(self.output_html_dir)
 
-        self.start_urls = mylib.make_urls_depend_race_id(self.base_url, start_year)
-        print('クロール対象数:' + str(len(self.start_urls)))
+        start_urls = mylib.make_urls_depend_race_id(self.base_url, start_year)
+        print('クロール対象数:' + str(len(start_urls)))
+        for q in start_urls:
+            yield scrapy.Request(q)
 
     def parse(self, response):
         # 馬柱は2007年7月28日からで中途半端なので2007年度指定でも弾けるようにしている

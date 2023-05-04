@@ -18,8 +18,8 @@ class HorseCrawlerSpider(scrapy.Spider):
 
     def start_requests(self):
         """
-        __init__でのself.start_urls指定では、referer参照で二重にクロールされていたが、本関数ではそれが解消できた。
-        TODO 他のクロールではどうなのか再検証
+        「更新」
+        __init__でのstart_urls指定では、referer参照で二重にクロールされていたが、本関数ではそれが解消できた。
         """
         start_year = 2009
         mylib.make_output_dir(self.output_html_dir)

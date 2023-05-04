@@ -26,6 +26,7 @@ class JockeyResultProcessing(DataframeProcessing):
         """
         昨年成績データの抽出と結合
         """
+        print('jockey_result_profile.merge')
         df_list = []
         for index, row in merged_df[['jockey_id', 'race_date']].iterrows():
             jockey_filtered = self.df[self.df.index == row['jockey_id']]

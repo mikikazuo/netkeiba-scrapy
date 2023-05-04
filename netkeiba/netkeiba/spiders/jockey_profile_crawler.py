@@ -15,18 +15,18 @@ class JockeyProfileCrawlerSpider(scrapy.Spider):
     # 騎手プロフィールhtmlの出力先ディレクトリパス
     output_html_dir = 'D:/netkeiba/html_data/jockey_profile/'
 
-    def __init__(self, *args, **kwargs):
+    def start_requests(self):
         """
         「取得」
-
         年度指定なしで実行
         """
-        super(JockeyProfileCrawlerSpider, self).__init__(*args, **kwargs)
         mylib.make_output_dir(self.output_html_dir)
 
-        self.start_urls = mylib.make_urls_depend_list_csv(self.base_url, self.input_csv_path, 'jockey_id',
-                                                          self.output_html_dir)
-        print('クロール対象数:' + str(len(self.start_urls)))
+        start_urls = mylib.make_urls_depend_list_csv(self.base_url, self.input_csv_path, 'jockey_id',
+                                                     self.output_html_dir)
+        print('クロール対象数:' + str(len(start_urls)))
+        for q in start_urls:
+            yield scrapy.Request(q)
 
     def parse(self, response):
         yield scrapy.Request(url=response.url, callback=self.jockey_profile_parse)

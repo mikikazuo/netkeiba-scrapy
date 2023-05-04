@@ -14,29 +14,29 @@ class RaceCrawlerSpider(scrapy.Spider):
     # レースデータhtml出力先ディレクトリパス
     output_html_dir = 'D:/netkeiba/html_data/race/'
 
-    # start_yearからend_yearまでの年度データを取得
-    def __init__(self, start_year, end_year, *args, **kwargs):
+    def start_requests(self):
         """
-        起動コマンド　scrapy crawl race_crawler -a start_year=[開始年] -a end_year=[終了年]
+        「取得」
 
         開始年と終了年の差は４以下に抑えたほうがいい。多すぎると途中でPCが勝手に再起動した。
 
+        start_yearからend_yearまでの年度データを取得
         期間が１年の場合は開始年と終了年に同じ値を入れる
 
         レースは1986年1月から
-
-        :param start_year: 「取得」対象の開始年度
-        :param end_year: 「取得」対象の終了年度
         """
-        super(RaceCrawlerSpider, self).__init__(*args, **kwargs)
+        start_year = 2005
+        end_year = 2010
         mylib.make_output_dir(self.output_html_dir)
 
         # 1985年以前はレースデータに１着の馬しか記載されていないため、ここで切り上げる
         start_year_formed = np.clip(start_year, 1986, None)
         # rangeで含まれるようにint(start) - 1にしている
-        self.start_urls = [self.base_url + '?pid=race_top&date=' + str(i) + str(j).zfill(2) + '01' for i in
-                           range(int(end_year), int(start_year_formed) - 1, -1) for j in range(1, 13)]
-        print('クロール対象数:' + str(len(self.start_urls)))
+        start_urls = [self.base_url + '?pid=race_top&date=' + str(i) + str(j).zfill(2) + '01' for i in
+                      range(int(end_year), int(start_year_formed) - 1, -1) for j in range(1, 13)]
+        print('クロール対象数:' + str(len(start_urls)))
+        for q in start_urls:
+            yield scrapy.Request(q)
 
     def parse(self, response):
         race_list = response.xpath(

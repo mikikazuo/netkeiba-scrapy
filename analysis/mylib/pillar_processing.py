@@ -77,6 +77,7 @@ class PillarProcessing(DataframeProcessing):
         """
         日付差へ更新
         """
+        print('pillar_data.update_race_date')
         # 不要レース馬柱一式の削除
         index_list = merged_df_cp[merged_df_cp["race_date_1"].isnull()]["race_date_1"].index.map(lambda x: x[0])
         merged_df = merged_df_cp.drop(index_list)
