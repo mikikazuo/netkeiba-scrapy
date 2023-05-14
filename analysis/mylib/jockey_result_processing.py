@@ -29,6 +29,7 @@ class JockeyResultProcessing(DataframeProcessing):
         print('jockey_result_profile.merge')
         df_list = []
         for index, row in merged_df[['jockey_id', 'race_date']].iterrows():
+            # locの場合、単一行しかないとseries型になるため条件検索にした。ex. 05619
             jockey_filtered = self.df[self.df.index == row['jockey_id']]
             date_filtered = jockey_filtered[jockey_filtered['jockey_result_year'] == row['race_date'].year - 1]
             # デビュー年前だとデータがないため0で埋めて仮で作成 ex.05619であれば2021年度分がない

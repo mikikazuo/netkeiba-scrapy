@@ -193,7 +193,8 @@ class HorseProcessing(DataframeProcessing):
                          "float64")
 
         # 順位の標準化
-        self.df["order_nor"] = (self.df["order"] - 1) / (self.df["horse_num"] - 1).astype("float64")
+        #self.df["order_nor"] = (self.df["order"] - 1) / (self.df["horse_num"] - 1).astype("float64")
+        self.df["order"] = self.df["horse_num"] - self.df["order"]
 
         # 名前は存在するがリンク先idがないパターン ex.2019190004
         self.df['maker_id'] = self.df['maker_id'].fillna('None')
@@ -204,15 +205,10 @@ class HorseProcessing(DataframeProcessing):
         print('race count adding')
         grouped_df = [[_name, _df] for _name, _df in self.df.groupby("horse_id")]
         self.df = GenerateOrderCnt(self.df, grouped_df).set_cnt()
-        self.df = GenerateFilterCnt(self.df, grouped_df, 'race_condition',
-                                    {'良': 'good', '稍': 'normal', '重': 'bad', '不': 'poor'}).set_cnt()
-        self.df = GenerateFilterCnt(self.df, grouped_df, 'weather',
-                                    {'晴': 'sunny', '曇': 'cloudy', '小雨': 'litrainy', '雨': 'rainy',
-                                     '小雪': 'litsnowy', '雪': 'snowy'}).set_cnt()
+        # self.df = GenerateFilterCnt(self.df, grouped_df, 'race_condition',
+        #                             {'良': 'good', '稍': 'normal', '重': 'bad', '不': 'poor'}).set_cnt()
+        # self.df = GenerateFilterCnt(self.df, grouped_df, 'weather',
+        #                             {'晴': 'sunny', '曇': 'cloudy', '小雨': 'litrainy', '雨': 'rainy',
+        #                              '小雪': 'litsnowy', '雪': 'snowy'}).set_cnt()
 
         self.df = self.df.set_index(["race_id", "horse_id"])
-
-        # set_order_cnt関数で使い終わった後で削除する
-        self.df = self.df.drop("order", axis=1)
-        if not self.is_human:
-            self.df = self.df.drop(["popularity", "odds"], axis=1)
