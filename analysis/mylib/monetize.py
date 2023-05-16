@@ -1,3 +1,6 @@
+import optuna
+
+
 def check_stable(ranker, higher_rank_df, need_predict_margin_list):
     """
     予測値の確度が高いかどうかの検証(不採用)
@@ -51,12 +54,13 @@ class Monetize:
         """
         return df.nsmallest(top_limit, target_col) if getmin else df.nlargest(top_limit, target_col)
 
-    def print_result(self, title, win_count, sum_payback, sum_race, match_popularity_count):
-        print(f'---------{title}({sum_race}/{len(self.df_predict)})---------')
+    def print_result(self, ranker, win_count, sum_payback, sum_race):
+        # self.df_predict前半は閾値チューニングで使用済み
+        half_idx = int(len(self.df_predict) / 2)
+        print(f'---------{ranker}({sum_race}/{len(self.df_predict[half_idx:])})---------')
         try:
             print(print_result('勝率', win_count, sum_race))
             print(print_result('回収率', sum_payback, sum_race * 100))
-            print(print_result('上位人気順一致率', match_popularity_count, win_count))
         except ZeroDivisionError:
             print("データ不足")
         print('')
@@ -65,86 +69,212 @@ class Monetize:
         """
         人気ベースのペイバック
         """
-        # 枠連では販売していないパターンがあるため専用のカウンター
-        sum_race = 0
-        win_count = 0
-        sum_payback = 0
-        for idx, df in enumerate(self.df_predict):
-            higher_rank_df = self.getmax_rev(df, "popularity", True)
-            if isinstance(ranker_list[0], int):
-                target_umaban = str(higher_rank_df.iloc[0]["umaban"])
-            elif isinstance(ranker_list[0], list):
-                target_umaban = [umaban for umaban in higher_rank_df.iloc[0:len(ranker_list[0])][
-                    "wakuban" if column == 'wakuren' else 'umaban']]
-                if order_fix:
-                    target_umaban = ' → '.join(list(map(str, target_umaban)))
-                else:
-                    target_umaban.sort()
-                    target_umaban = ' - '.join(list(map(str, target_umaban)))
-            data = self.get_payback_dict(df, column)
-            if not data:  # 枠連では販売していないパターンがあるため
-                continue
-            sum_race += 1
-            if target_umaban in data:
-                win_count += 1
-                sum_payback += data[target_umaban]
-        self.print_result(column, win_count, sum_payback, sum_race, win_count)
+
+        def calc(min_list, is_tune=False):
+            # 枠連では販売していないパターンがあるため専用のカウンター
+            sum_race = win_count = sum_payback = 0
+            half_idx = int(len(self.df_predict) / 2)
+            for idx, df in enumerate(self.df_predict[:half_idx] if is_tune else self.df_predict[half_idx:]):
+                higher_rank_df = self.getmax_rev(df, 'popularity', True)
+                if isinstance(ranker, int):
+                    target_row = higher_rank_df.iloc[ranker]
+                    # 上位馬番の取得
+                    target_umaban = str(target_row["umaban"])
+                    target_odds = target_row["odds"]
+                elif isinstance(ranker, list):
+                    try:
+                        target_umaban = [higher_rank_df.iloc[index]["wakuban" if column == 'wakuren' else 'umaban']
+                                         for index in ranker]
+                        target_odds = [higher_rank_df.iloc[index]["odds"] for index in ranker]
+                    except IndexError:  # 馬数不足 ex.202207010608
+                        continue
+                    if order_fix:
+                        target_umaban = ' → '.join(list(map(str, target_umaban)))
+                    else:
+                        target_umaban.sort()
+                        target_umaban = ' - '.join(list(map(str, target_umaban)))
+                data = self.get_payback_dict(df, column)
+                if not data:  # 枠連では販売していないパターンがあるため
+                    continue
+                if isinstance(ranker, int):
+                    if min_list[0] > target_odds:
+                        continue
+                elif isinstance(ranker, list):
+                    flag = False
+                    for i, val in enumerate(min_list):
+                        if val > target_odds[i]:
+                            flag = True
+                            break
+                    if flag:
+                        continue
+                sum_race += 1
+                if target_umaban in data:
+                    win_count += 1
+                    sum_payback += data[target_umaban]
+            return sum_race, win_count, sum_payback
+
+        def tuning(trial):
+            """
+            閾値チューニング
+            :return:
+            """
+            # 最大は第1四分位数以下にした  確認法：df.quantile(0.25)
+            min_list = [trial.suggest_float("first_min", 1, 8)]
+            if isinstance(ranker, list):
+                if len(ranker_list[0]) > 1:
+                    min_list.append(trial.suggest_float("second_min", 1, 8))
+                if len(ranker_list[0]) > 2:
+                    min_list.append(trial.suggest_float("third_min", 1, 8))
+            sum_race, win_count, sum_payback = calc(min_list, True)
+            return sum_payback / (sum_race * 100) if sum_race else 0
+
+        def validation(best_params):
+            """
+            確定パラメータによる結果
+            :return:
+            """
+            print(best_params)
+            min_list = [best_params["first_min"]]
+            if isinstance(ranker, list):
+                if len(ranker_list[0]) > 1:
+                    min_list.append(best_params["second_min"])
+                if len(ranker_list[0]) > 2:
+                    min_list.append(best_params["third_min"])
+            sum_race, win_count, sum_payback = calc(min_list)
+            self.print_result(ranker, win_count, sum_payback, sum_race)
+
+        def no_tuning_validation():
+            print('  ・チューニングなし')
+            min_list = [1]
+            if isinstance(ranker, list):
+                if len(ranker_list[0]) > 1:
+                    min_list.append(1)
+                if len(ranker_list[0]) > 2:
+                    min_list.append(1)
+            sum_race, win_count, sum_payback = calc(min_list)
+            self.print_result(ranker, win_count, sum_payback, sum_race)
+
+        for ranker in ranker_list:
+            print('  ◆ 人気ベース')
+            # 人気ベースのチューニングは効果なし
+            # study = optuna.create_study(direction='maximize')
+            # study.optimize(tuning, n_trials=100)
+            # validation(study.best_params)
+            no_tuning_validation()
+
+    def check_payback_predict_base(self, column, order_fix, ranker_list):
+        """
+        予想ベースのペイバック
+        """
+
+        def calc(min_list, is_tune=False):
+            # 枠連では販売していないパターンがあるため専用のカウンター
+            sum_race = win_count = sum_payback = 0
+            half_idx = int(len(self.df_predict) / 2)
+            for idx, df in enumerate(self.df_predict[:half_idx] if is_tune else self.df_predict[half_idx:]):
+                higher_rank_df = self.getmax_rev(df)
+                if isinstance(ranker, int):
+                    target_row = higher_rank_df.iloc[ranker]
+                    # 上位馬番の取得
+                    target_umaban = str(target_row["umaban"])
+                    target_odds = target_row["odds"]
+                elif isinstance(ranker, list):
+                    try:
+                        target_umaban = [higher_rank_df.iloc[index]["wakuban" if column == 'wakuren' else 'umaban']
+                                         for index in ranker]
+                        target_odds = [higher_rank_df.iloc[index]["odds"] for index in ranker]
+                    except IndexError:  # 馬数不足 ex.202207010608
+                        continue
+                    if order_fix:
+                        target_umaban = ' → '.join(list(map(str, target_umaban)))
+                    else:
+                        target_umaban.sort()
+                        target_umaban = ' - '.join(list(map(str, target_umaban)))
+                data = self.get_payback_dict(df, column)
+                if not data:  # 枠連では販売していないパターンがあるため
+                    continue
+                if isinstance(ranker, int):
+                    if min_list[0] > target_odds:
+                        continue
+                elif isinstance(ranker, list):
+                    flag = False
+                    for i, val in enumerate(min_list):
+                        if val > target_odds[i]:
+                            flag = True
+                            break
+                    if flag:
+                        continue
+                sum_race += 1
+                # どんな結果でも最低100払い戻しは保証されているらしい
+                if target_umaban in data:
+                    win_count += 1
+                    sum_payback += data[target_umaban]
+            return sum_race, win_count, sum_payback
+
+        def tuning(trial):
+            """
+            閾値チューニング
+            :return:
+            """
+            # 最大は第1四分位数以下にした  確認法：df.quantile(0.25)
+            min_list = [trial.suggest_float("first_min", 1, 8)]
+            if isinstance(ranker, list):
+                if len(ranker_list[0]) > 1:
+                    min_list.append(trial.suggest_float("second_min", 1, 8))
+                if len(ranker_list[0]) > 2:
+                    min_list.append(trial.suggest_float("third_min", 1, 8))
+            sum_race, win_count, sum_payback = calc(min_list, True)
+            return sum_payback / (sum_race * 100) if sum_race else 0
+
+        def validation(best_params):
+            """
+            確定パラメータによる結果
+            :return:
+            """
+            print(best_params)
+            min_list = [best_params["first_min"]]
+            if isinstance(ranker, list):
+                if len(ranker_list[0]) > 1:
+                    min_list.append(best_params["second_min"])
+                if len(ranker_list[0]) > 2:
+                    min_list.append(best_params["third_min"])
+            sum_race, win_count, sum_payback = calc(min_list)
+            self.print_result(ranker, win_count, sum_payback, sum_race)
+
+        def no_tuning_validation():
+            print('  ・チューニングなし')
+            min_list = [1]
+            if isinstance(ranker, list):
+                if len(ranker_list[0]) > 1:
+                    min_list.append(1)
+                if len(ranker_list[0]) > 2:
+                    min_list.append(1)
+            sum_race, win_count, sum_payback = calc(min_list)
+            self.print_result(ranker, win_count, sum_payback, sum_race)
+
+        for ranker in ranker_list:
+            print('  ◆ 予想ベース')
+            study = optuna.create_study(direction='maximize')
+            study.optimize(tuning, n_trials=100)
+            validation(study.best_params)
+            no_tuning_validation()
 
     def check_payback(self, column_list, order_fix, ranker_list):
         """
         :param column_list:
         :param order_fix: 順不同ではないかどうか
         :param ranker_list: 順位リスト 0が１位　int型（単勝用など）とlist型（三連単用など）の２パターン存在
-        :param payback_border: オッズが指定値以上の場合に買う（オッズを確認してから馬券購入するという流れを踏まえたもの）
         """
         for column in column_list:
-            print('=============================================')
+            print(f'=============[ {column} ]=============')
             self.check_payback_popularity_base(column, order_fix, ranker_list)
-            for ranker in ranker_list:
-                # 枠連では販売していないパターンがあるため専用のカウンター
-                sum_race = 0
-                win_count = 0
-                sum_payback = 0
-                match_popularity_count = 0
-                for idx, df in enumerate(self.df_predict):
-                    higher_rank_df = self.getmax_rev(df)
-                    if isinstance(ranker, int):
-                        target_row = higher_rank_df.iloc[ranker]
-                        # 上位馬番の取得
-                        target_umaban = str(target_row["umaban"])
-                        if column == 'fukushou':
-                            is_match_popularity = target_row["popularity"] in [1, 2, 3]
-                        else:
-                            is_match_popularity = target_row["popularity"] == 1
-                    elif isinstance(ranker, list):
-                        try:
-                            target_umaban = [higher_rank_df.iloc[index]["wakuban" if column == 'wakuren' else 'umaban']
-                                             for index in ranker]
-                        except IndexError:  # 馬数不足 ex.202207010608
-                            continue
-                        if order_fix:
-                            target_umaban = ' → '.join(list(map(str, target_umaban)))
-                        else:
-                            target_umaban.sort()
-                            target_umaban = ' - '.join(list(map(str, target_umaban)))
-                        is_match_popularity = True
-                        for i, index in enumerate(ranker):
-                            if higher_rank_df.iloc[index]["popularity"] != i + 1:
-                                is_match_popularity = False
-                                break
-                    data = self.get_payback_dict(df, column)
-                    if not data:  # 枠連では販売していないパターンがあるため
-                        continue
-                    sum_race += 1
-                    # どんな結果でも最低100払い戻しは保証されているらしい
-                    if target_umaban in data:
-                        win_count += 1
-                        sum_payback += data[target_umaban]
-                        if is_match_popularity:
-                            match_popularity_count += 1
-                self.print_result(column, win_count, sum_payback, sum_race, match_popularity_count)
+            self.check_payback_predict_base(column, order_fix, ranker_list)
 
     def __init__(self, df_predict, df_payback):
+        """
+        :param df_predict:
+        :param df_payback:
+        """
         self.df_predict = df_predict
         self.df_payback = df_payback
 

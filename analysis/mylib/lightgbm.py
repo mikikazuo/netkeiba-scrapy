@@ -36,7 +36,8 @@ class LightGbm:
             """
             idx = int(len(self.df) * (1 - ratio))
             _race_id = self.df.iloc[idx].name[0]
-            return self.df.index.get_loc(_race_id).start
+            # sort後だとget_locが使えなかったためlist型で対処
+            return list(self.df.index.map(lambda x: x[0])).index(_race_id)
 
         def shuffle_df(target_df):
             """
@@ -76,7 +77,7 @@ class LightGbm:
                 'feature_fraction': feature_fraction,
             }
             params.update(add_params)
-            model = lgb.train(params, trains, valid_sets=valids)
+            model = lgb.train(params, trains, valid_sets=[trains, valids])
             # 推論
             y_pred = model.predict(x_validation)
             # 評価
@@ -87,26 +88,25 @@ class LightGbm:
             ndcg /= len(y_cnt_for_study)
             return ndcg
 
-        self.validation_index = output_idx(self.validation_size + self.test_size)
-        self.test_index = output_idx(self.test_size)
+        validation_index = output_idx(self.validation_size + self.test_size)
+        test_index = output_idx(self.test_size)
 
         print('テストデータシャッフル')
-        train = shuffle_df(self.df[:self.validation_index])
+        train = shuffle_df(self.df[:validation_index])
         x_train, y_train = train[self.feature_cols], train[[self.target_col]]
 
         print('検証データシャッフル')
-        validation = shuffle_df(self.df[self.validation_index:self.test_index])
+        validation = shuffle_df(self.df[validation_index:test_index])
         x_validation, y_validation = validation[self.feature_cols], validation[[self.target_col]]
         y_val_for_study = y_validation[self.target_col].values
         y_cnt_for_study = y_validation.groupby("race_id")[self.target_col].count().values
 
-        test = self.df[self.test_index:]
+        test = self.df[test_index:]
         x_test, self.y_test = test[self.feature_cols], test[[self.target_col]]
 
         trains = lgb.Dataset(x_train, y_train, group=y_train.groupby("race_id")[self.target_col].count().values)
         valids = lgb.Dataset(x_validation, y_validation,
                              group=y_validation.groupby("race_id")[self.target_col].count().values)
-
         add_params = {
             'objective': 'lambdarank',
             "metric": "ndcg",
@@ -126,8 +126,8 @@ class LightGbm:
         best_params.update(add_params)
         best_params['num_leaves'] = int(pow(2, best_params['max_depth']) * best_params['leaf_ratio'])
 
-        self.model = lgb.train(best_params, trains, valid_sets=valids)
-        self.test_df = self.df[self.test_index:].copy()
+        self.model = lgb.train(best_params, trains, valid_sets=[trains, valids])
+        self.test_df = self.df[test_index:].copy()
         # lightgbmの予測値カラムの追加
         self.test_df["predict"] = self.model.predict(x_test)
 
