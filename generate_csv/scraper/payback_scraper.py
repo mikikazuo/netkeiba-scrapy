@@ -14,11 +14,11 @@ class PaybackScraper(mylib.Scraper):
                 return None
 
             key_size = int(len(data) / 3)
-            return {'umaban': data[0:key_size], 'payback': data[key_size:key_size * 2], 'ninki': data[key_size * 2:]}
+            return {'umaban': data[0:key_size], 'payback': data[key_size:key_size * 2], 'popularity': data[key_size * 2:]}
 
         html = mylib.read_html(html_path)
 
-        tanshou_data = html.xpath('//th[@class="tan"]/following-sibling::td/text()')
+        tanshou_data = html.xpath('//th [@class="tan"]/following-sibling::td/text()')
         fukushou_data = html.xpath('//th[@class="fuku"]/following-sibling::td/text()')
         # 出走する馬が9頭以上の場合に発売  枠は同じ番号の馬がいる場合がある
         wakuren_data = html.xpath('//th[@class="waku"]/following-sibling::td/text()')
