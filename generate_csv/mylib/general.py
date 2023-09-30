@@ -95,6 +95,7 @@ class Scraper(metaclass=ABCMeta):
 
         def write_result(path):
             result_list = pool.map(self.scrape_from_page, path)
+            # result_list = [self.scrape_from_page(p) for p in path]
             for result in result_list:
                 writer.writerows(result)
 
