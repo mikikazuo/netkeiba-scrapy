@@ -192,9 +192,9 @@ class HorseProcessing(DataframeProcessing):
         self.change_type(["odds", "time", "diff_from_top", "nobori", "jockey_weight", "pace_start", "pace_goal"],
                          "float64")
 
+        #self.df["order"] = self.df["horse_num"] - self.df["order"]
         # 順位の標準化
-        #self.df["order_nor"] = (self.df["order"] - 1) / (self.df["horse_num"] - 1).astype("float64")
-        self.df["order"] = self.df["horse_num"] - self.df["order"]
+        self.df["order"] = ((self.df["horse_num"] - self.df["order"]) / (self.df["horse_num"] - 1)).astype("float64")
 
         # 名前は存在するがリンク先idがないパターン ex.2019190004
         self.df['maker_id'] = self.df['maker_id'].fillna('None')

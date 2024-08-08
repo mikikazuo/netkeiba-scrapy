@@ -19,11 +19,12 @@ class PillarProcessing(DataframeProcessing):
                 if str(i) in column:
                     self.df = self.df.drop(column, axis=1)
 
+        # 馬柱のページでは順位が分からない場合がある　⇒　本当はレースページから取得した方がよい
         for i in range(1, self.past_max + 1):
             self.df[f'order_{i}'] = self.df[f'order_{i}'].replace('除', -100).replace('中', -100) \
                 .replace('取', -100).replace('降', -100).replace('失', -100)
 
-            # 空白埋め
+            # 空白埋め １月をnull時の値としてしまっている
             self.df[f'race_date_{i}'] = self.df[f'race_date_{i}'].fillna('1900.01.01')
             self.df[f'time_{i}'] = self.df[f'time_{i}'].fillna('0:0')
             # タイムにコロン(:)がないパターンがあるため修正 人的表記ミス ex.201901010311 チャンピオ

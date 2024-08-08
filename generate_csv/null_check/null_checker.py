@@ -31,10 +31,10 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
 
     # チェック対象のcsvのパス
-    check_csv_path = mypath.condition_csv
+    check_csv_path = mypath.pillar_csv
 
     # チェック結果シートのファイル名
-    output_null_checker_path = 'condition_check.txt'
+    output_null_checker_path = 'pillar_check.txt'
 
     # int値が小数にならないようobject型で読み込む
     df = pd.read_csv(check_csv_path, dtype=object)

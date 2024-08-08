@@ -35,10 +35,17 @@ if __name__ == "__main__":
     # gbm.protData()
 
     money = Monetize(df_predict, paybackData.df)
-    money.check_payback(['tanshou', 'fukushou'], False, [0, 1, 2])
-    money.check_payback(['wakuren', 'umaren', 'wide'], False, [[0, 1], [0, 2], [1, 2]])
-    money.check_payback(['umatan'], True, [[0, 1], [1, 0], [0, 2], [1, 2], [2, 0]])
-    money.check_payback(['sanrenpuku'], False, [[0, 1, 2], [0, 1, 3], [0, 2, 3], [1, 2, 3]])
-    money.check_payback(['sanrentan'], True, [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]])
+    for column in ['tanshou', 'fukushou']:
+        money.check_payback(column, False, [0, 1, 2])
+    for column in ['wakuren', 'umaren', 'wide']:
+        money.check_payback(column, False, [[0, 1], [0, 2], [1, 2]])
+    money.check_payback('umatan', True, [[0, 1], [1, 0], [0,2], [1, 2], [2, 0]])
+    money.check_payback('sanrenpuku', False, [[0, 1, 2], [0, 1, 3], [0, 2, 3], [1, 2, 3]])
+    money.check_payback('sanrentan', True, [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]])
 
     print(f'経過時間: {time.time() - start}')
+
+    # nanチェック
+    # for col in merged_df.columns:
+    #     if len(merged_df[merged_df[col].isnull()]):
+    #         print(col)

@@ -75,6 +75,7 @@ class LightGbm:
                 'lambda_l1': lambda_l1,
                 'lambda_l2': lambda_l2,
                 'feature_fraction': feature_fraction,
+                "early_stopping_round": 30,
             }
             params.update(add_params)
             model = lgb.train(params, trains, valid_sets=[trains, valids])
@@ -107,17 +108,25 @@ class LightGbm:
         trains = lgb.Dataset(x_train, y_train, group=y_train.groupby("race_id")[self.target_col].count().values)
         valids = lgb.Dataset(x_validation, y_validation,
                              group=y_validation.groupby("race_id")[self.target_col].count().values)
+        # ランキング予測
+        # add_params = {
+        #     'objective': 'lambdarank',
+        #     "metric": "ndcg",
+        #     'ndcg_eval_at': [1, 2, 3],
+        #     "early_stopping_round": 30,
+        #     'n_estimators': 1000,
+        #     'feature_pre_filter': False,
+        #     'seed': 1
+        #     # gossではバギングが使えない(使う場合関連パラメータ除去が必要)
+        #     # dartではearly_stoppingが使えない、必ずn_estimators回実行する
+        #     # 'boosting': "dart",
+        # }
+        # 回帰
         add_params = {
-            'objective': 'lambdarank',
-            "metric": "ndcg",
-            'ndcg_eval_at': [1, 2, 3],
-            "early_stopping_round": 30,
-            'n_estimators': 1000,
-            'feature_pre_filter': False,
-            'seed': 1
-            # gossではバギングが使えない(使う場合関連パラメータ除去が必要)
-            # dartではearly_stoppingが使えない、必ずn_estimators回実行する
-            # 'boosting': "dart",
+            'boosting_type': 'gbdt',  # 勾配ブースティング
+            'objective': 'regression',  # 目的関数：回帰
+            'metric': 'rmse',  # 分類モデルの性能を測る指標
+            'feature_pre_filter': False  # min_data_in_leafをチューニングする場合必要
         }
         self.study = optuna.create_study(direction='maximize')
         self.study.optimize(objective, n_trials=100)
@@ -136,7 +145,7 @@ class LightGbm:
         RMSE = np.sqrt(mean_squared_error(predicted_df["true"], predicted_df["predict"]))
         plt.figure(figsize=(7, 7))
         ax = plt.subplot(111)
-        ax.scatter("true", "predict", data=predicted_df)
+        ax.scatter("true", "predict", data=predicted_df, alpha=self.plot_alpha)
         ax.set_xlabel("True Price", fontsize=20)
         ax.set_ylabel("Predicted Price", fontsize=20)
         plt.tick_params(labelsize=15)
@@ -145,7 +154,7 @@ class LightGbm:
         ax.plot(x, y, "r-")
         plt.text(0.1, 0.9, "RMSE = {}".format(str(round(RMSE, 3))), transform=ax.transAxes, fontsize=15)
 
-    def protData(self):
+    def plot_data(self):
         lgb.plot_importance(self.model, height=0.5, figsize=(16, 12), ignore_zero=False)
         # テストデータを用いて予測精度を確認する)
         predicted_df = pd.concat([self.y_test.reset_index(drop=True), self.test_df["predict"].reset_index(drop=True)],
@@ -156,7 +165,7 @@ class LightGbm:
 
     def __init__(self, df):
         # 目的変数カラム
-        self.target_col = "order"  # _nor"
+        self.target_col = "order"
 
         # 答えになってしまうカラム（レース後にわかるデータ）
         answer_col = [self.target_col] + ["time", "diff_from_top", "nobori", "pace_goal", "pace_start",
@@ -171,5 +180,6 @@ class LightGbm:
         # 過去レースとの差分日数を抽出したので用済み
         self.feature_cols.remove("race_date")
 
+        self.plot_alpha = 0.01
         self.df = df
         self.training()

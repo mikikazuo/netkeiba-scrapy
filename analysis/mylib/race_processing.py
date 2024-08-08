@@ -20,14 +20,13 @@ class RaceProcessing(DataframeProcessing):
         time_list = self.df["start_time"].str.split(":")
         time_list = time_list.map(lambda x: list(map(float, x)))
         self.df["start_time"] = time_list.map(lambda x: x[0] * 60 + x[1])
-        self.df["outside"] = self.df["outside"].map(lambda x: 1 if x else 0)
 
         # 障害レースの時はNanになっている ex.202203010204
         self.df['turn'] = self.df['turn'].fillna('None')
 
         self.change_type(["start_time"], "int16")
-        self.change_type(["age", "outside"], "int8")
+        self.change_type(["age"], "int8")
 
-        self.change_type(["sex", "tresen", "trainer_id", "owner_id", "turn"], "category")
+        self.change_type(["sex", "tresen", "trainer_id", "owner_id", "turn", "outside"], "category")
 
         self.df = self.df.set_index(["race_id", "horse_id"])
